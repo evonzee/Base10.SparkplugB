@@ -13,7 +13,7 @@ namespace Base10.SparkplugB.Interfaces
     /// that may just be the node itself.  For Application implementations, there may be many instances.
     /// 
     /// </summary>
-    /// <seealso href="https://sparkplug.eclipse.org/specification/version/3.0/documents/sparkplug-specification-3.0.0.pdf">TCK, tck-id-payloads-alias-uniqueness</seealso>
+    /// <seealso href="https://sparkplug.eclipse.org/specification/version/3.0/documents/sparkplug-specification-3.0.0.pdf">SparkplugB 3.0 TCK, search for tck-id-payloads-alias-uniqueness</seealso>
     public interface IMetricStorage<N,D> where N: IMetric where D: IDeviceMetric
     {
         /// <summary>
