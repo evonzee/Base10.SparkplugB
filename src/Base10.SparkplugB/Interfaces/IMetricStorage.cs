@@ -57,14 +57,25 @@ namespace Base10.SparkplugB.Interfaces
         public Task<D> AddDeviceMetric(D metric);
 
         /// <summary>
-        /// Gets the alias for an existing metric.  Throws InvalidMetricException if no metric exists by this name
+        /// Gets the alias for an existing node metric.  Throws InvalidMetricException if no metric exists by this name
         /// </summary>
         /// <param name="name"></param>
         /// <returns></returns>
         public Task<int> GetAlias(string name); 
 
         /// <summary>
-        /// Gets the Metric instance using the alias.  Throws InvalidMetricException if no metric exists with this alias
+        /// Gets the alias for an existing device metric.  Throws InvalidMetricException if no metric exists by this name
+        /// </summary>
+        /// <param name="deviceName">The device name</param>
+        /// <param name="name">The metric name</param>
+        /// <returns></returns>
+        public Task<int> GetAlias(string deviceName, string name); 
+
+        /// <summary>
+        /// Gets the Metric instance using the alias.  Throws InvalidMetricException if no metric exists with this alias.
+        /// 
+        /// Note that this could be an IDeviceMetric as well as a plain IMetric, but Device metrics will be delivered with DDATA/DCMD 
+        /// so it probably doesn't matter for consumers of this method.
         /// </summary>
         /// <param name="alias">The alias to look up</param>
         /// <returns>The Metric instance with this alias, if found</returns>
