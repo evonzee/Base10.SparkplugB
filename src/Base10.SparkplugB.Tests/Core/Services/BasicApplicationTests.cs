@@ -14,7 +14,8 @@ namespace Base10.SparkplugB.Tests.Core.Services
 		[Fact]
 		public void SequenceNumberIsThreadSafe()
 		{
-			var app = new Mock<ExposedApplication>() {
+			var app = new Mock<ExposedApplication>()
+			{
 				CallBase = true
 			}.Object;
 			var tasks = new List<Task>();
@@ -29,7 +30,7 @@ namespace Base10.SparkplugB.Tests.Core.Services
 				}));
 			}
 			Task.WaitAll(tasks.ToArray());
-			Assert.Equal(10001%256, app.NextSequence());
+			Assert.Equal(10001 % 256, app.NextSequence());
 		}
 	}
 }

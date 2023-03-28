@@ -5,11 +5,11 @@ using System.Threading.Tasks;
 
 namespace Base10.SparkplugB.Interfaces
 {
-    /// <summary>
-    /// A Metric that is tracked via SparkplugB
-    /// </summary>
-    public interface IMetric
-    {
-        
-    }
+	/// <summary>
+	/// A Metric that is tracked via SparkplugB
+	/// </summary>
+	public interface IMetric
+	{
+
+	}
 }

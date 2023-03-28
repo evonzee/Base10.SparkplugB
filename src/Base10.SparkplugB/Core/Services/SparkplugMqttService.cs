@@ -67,10 +67,12 @@ namespace Base10.SparkplugB.Core.Services
 			await _mqttClient.StopAsync();
 		}
 
-		protected int NextSequence() {
-			lock(_sequenceLock) {
+		protected int NextSequence()
+		{
+			lock (_sequenceLock)
+			{
 				_sequence++;
-				if(_sequence > 255) _sequence = 0;
+				if (_sequence > 255) _sequence = 0;
 			}
 			return _sequence;
 		}
