@@ -1,28 +1,27 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Base10.SparkplugB.Core.Data;
 using Base10.SparkplugB.Interfaces;
 using MQTTnet;
 using MQTTnet.Client;
 using MQTTnet.Extensions.ManagedClient;
 
-namespace Base10.SparkplugB.Core.Mqtt
+namespace Base10.SparkplugB.Core.Services
 {
-	public abstract class SparkplugMqttService<N, D> where N:IMetric where D:IDeviceMetric
+	public abstract class SparkplugMqttService
 	{
-
+		private readonly IManagedMqttClient _mqttClient;
 		private readonly string _mqttServerUri;
 		private readonly string _clientId;
 		private readonly string _username;
 		private readonly string _password;
-		private readonly string _group;
-		private readonly IMetricStorage<N,D> _metricStorage;
 		private int _sequence = 0;
-		private object _sequenceLock = new object();
+		private readonly object _sequenceLock = new object();
+		protected readonly string _group;
+		protected readonly IMetricStorage _metricStorage;
 
-		private IManagedMqttClient _mqttClient;
-
-		public SparkplugMqttService(string mqttServerUri, string clientId, string username, string password, string group, IMetricStorage<N, D> metricStorage)
+		public SparkplugMqttService(string mqttServerUri, string clientId, string username, string password, string group, IMetricStorage metricStorage)
 		{
 			_mqttServerUri = mqttServerUri;
 			_clientId = clientId;
@@ -30,6 +29,7 @@ namespace Base10.SparkplugB.Core.Mqtt
 			_password = password;
 			_group = group;
 			_metricStorage = metricStorage;
+			_mqttClient = new MqttFactory().CreateManagedMqttClient();
 		}
 
 		protected async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -47,8 +47,6 @@ namespace Base10.SparkplugB.Core.Mqtt
 				.WithAutoReconnectDelay(TimeSpan.FromSeconds(5))
 				.WithClientOptions(options)
 				.Build();
-
-			_mqttClient = new MqttFactory().CreateManagedMqttClient();
 
 			// add handlers
 
