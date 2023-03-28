@@ -17,7 +17,6 @@ namespace Base10.SparkplugB.Core.Services
 		private readonly string _username;
 		private readonly string _password;
 		private int _sequence = 0;
-		private readonly object _sequenceLock = new object();
 		protected readonly string _group;
 		protected readonly IMetricStorage _metricStorage;
 
@@ -69,12 +68,8 @@ namespace Base10.SparkplugB.Core.Services
 
 		protected int NextSequence()
 		{
-			lock (_sequenceLock)
-			{
-				_sequence++;
-				if (_sequence > 255) _sequence = 0;
-			}
-			return _sequence;
+			Interlocked.Increment(ref _sequence);
+			return _sequence % 256;
 		}
 
 		protected abstract Task SendBirthSequence(IManagedMqttClient mqttClient);
