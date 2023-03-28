@@ -16,7 +16,7 @@ namespace Base10.SparkplugB.Core.Services
 		private readonly string _clientId;
 		private readonly string _username;
 		private readonly string _password;
-		private int _sequence = 0;
+		private long _sequence = 0; // basically guarantee we won't overflow for the life of this program(mer)
 		protected readonly string _group;
 		protected readonly IMetricStorage _metricStorage;
 
@@ -69,7 +69,7 @@ namespace Base10.SparkplugB.Core.Services
 		protected int NextSequence()
 		{
 			Interlocked.Increment(ref _sequence);
-			return _sequence % 256;
+			return (int)(_sequence % 256);
 		}
 
 		protected abstract Task SendBirthSequence(IManagedMqttClient mqttClient);
