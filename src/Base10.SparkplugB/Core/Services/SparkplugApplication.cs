@@ -9,7 +9,7 @@ namespace Base10.SparkplugB.Core.Services
 {
 	public class SparkplugApplication : SparkplugMqttService
 	{
-		public SparkplugApplication(string mqttServerUri, string clientId, string username, string password, string group, IMetricStorage metricStorage) : base(mqttServerUri, clientId, username, password, group, metricStorage)
+		public SparkplugApplication(string mqttServerUri, string clientId, string username, string password, string group) : base(mqttServerUri, clientId, username, password, group)
 		{
 		}
 

@@ -16,18 +16,16 @@ namespace Base10.SparkplugB.Core.Services
 		private readonly string _clientId;
 		private readonly string _username;
 		private readonly string _password;
-		private long _sequence = 0; // basically guarantee we won't overflow for the life of this program(mer)
+		private long _sequence = -1; // basically guarantee we won't overflow for the life of this program(mer)
 		protected readonly string _group;
-		protected readonly IMetricStorage _metricStorage;
 
-		public SparkplugMqttService(string mqttServerUri, string clientId, string username, string password, string group, IMetricStorage metricStorage)
+		public SparkplugMqttService(string mqttServerUri, string clientId, string username, string password, string group)
 		{
 			_mqttServerUri = mqttServerUri;
 			_clientId = clientId;
 			_username = username;
 			_password = password;
 			_group = group;
-			_metricStorage = metricStorage;
 			_mqttClient = new MqttFactory().CreateManagedMqttClient();
 		}
 
@@ -36,7 +34,9 @@ namespace Base10.SparkplugB.Core.Services
 			var optionsBuilder = new MqttClientOptionsBuilder()
 				.WithClientId(_clientId)
 				.WithTcpServer(_mqttServerUri)
-				.WithCredentials(_username, _password);
+				.WithCredentials(_username, _password)
+				.WithCleanSession() // [tck-id-principles-persistence-clean-session-50]
+				.WithSessionExpiryInterval(0); // [tck-id-principles-persistence-clean-session-50]
 
 			optionsBuilder = ConfigureLastWill(optionsBuilder);
 
@@ -52,24 +52,29 @@ namespace Base10.SparkplugB.Core.Services
 			await _mqttClient.StartAsync(managedOptions);
 
 			// subscribe to appropriate topics per configuration
+			// subscribe happens before birth, per [tck-id-host-topic-phid-birth-required]
 			await Subscribe(_mqttClient);
 
 			// send birth message
-			await SendBirthSequence(_mqttClient);
+			await SendBirthSequence(_mqttClient); // apps must satisfy [tck-id-components-ph-state]
 
 			// hang out and wait for events or shutdown
 			while (!stoppingToken.IsCancellationRequested)
 			{
-				await Task.Delay(TimeSpan.FromSeconds(1), stoppingToken);
+				await Task.Delay(TimeSpan.FromSeconds(60), stoppingToken);
 			}
 
-			await _mqttClient.StopAsync();
+			await _mqttClient.StopAsync(false); // always send the last will, if configured
 		}
 
-		protected int NextSequence()
+		protected int NextCommandSequence()
 		{
 			Interlocked.Increment(ref _sequence);
 			return (int)(_sequence % 256);
+		}
+		protected void ResetCommandSequence()
+		{
+			Interlocked.Exchange(ref _sequence, -1);
 		}
 
 		protected abstract Task SendBirthSequence(IManagedMqttClient mqttClient);
