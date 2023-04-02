@@ -61,6 +61,8 @@ namespace Base10.SparkplugB.Core.Services
 			return optionsBuilder;
 		}
 
+		#region Accessors for sequence numbers
+
 		protected int NextCommandSequence()
 		{
 			Interlocked.Increment(ref _sequence);
@@ -79,6 +81,8 @@ namespace Base10.SparkplugB.Core.Services
 		{
 			return (int)(_bdSequence % 256);
 		}
+
+		#endregion
 
 		#region Events
 
