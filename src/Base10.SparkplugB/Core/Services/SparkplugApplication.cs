@@ -11,6 +11,17 @@ namespace Base10.SparkplugB.Core.Services
 	{
 		public SparkplugApplication(string mqttServerUri, string clientId, string username, string password, string group) : base(mqttServerUri, clientId, username, password, group)
 		{
+			this.Connected += OnConnected;
+		}
+
+		private async Task OnConnected(EventArgs e)
+		{
+			// subscribe to appropriate topics per configuration
+			// subscribe happens before birth, per [tck-id-host-topic-phid-birth-required]
+			// await Subscribe(_mqttClient);
+
+			// send birth message
+			// await SendBirthSequence(_mqttClient); // apps must satisfy [tck-id-components-ph-state]
 		}
 
 		protected override MqttClientOptionsBuilder ConfigureLastWill(MqttClientOptionsBuilder optionsBuilder)
@@ -18,14 +29,6 @@ namespace Base10.SparkplugB.Core.Services
 			throw new NotImplementedException();
 		}
 
-		protected override Task SendBirthSequence(IManagedMqttClient mqttClient)
-		{
-			throw new NotImplementedException();
-		}
 
-		protected override Task Subscribe(IManagedMqttClient mqttClient)
-		{
-			throw new NotImplementedException();
-		}
 	}
 }

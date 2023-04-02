@@ -11,17 +11,22 @@ namespace Base10.SparkplugB.Tests.Core.Services
 	public class ExposedApplication : SparkplugApplication
 	{
 
-		public ExposedApplication() : base("", "", "", "", "", new InMemoryMetricStorage())
+		public ExposedApplication() : base("", "", "", "", "")
 		{
 		}
 
-		public ExposedApplication(string mqttServerUri, string clientId, string username, string password, string group, IMetricStorage metricStorage) : base(mqttServerUri, clientId, username, password, group, metricStorage)
+		public ExposedApplication(string mqttServerUri, string clientId, string username, string password, string group) : base(mqttServerUri, clientId, username, password, group)
 		{
 		}
 
-		public new int NextSequence()
+		public new int NextCommandSequence()
 		{
-			return base.NextSequence();
+			return base.NextCommandSequence();
+		}
+
+		public new int NextBirthSequence()
+		{
+			return base.NextBirthSequence();
 		}
 	}
 }
