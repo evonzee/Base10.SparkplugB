@@ -1,9 +1,6 @@
 using System;
 using System.Threading.Tasks;
-using Base10.SparkplugB.Core.Data;
-using Base10.SparkplugB.Interfaces;
 using MQTTnet.Client;
-using MQTTnet.Extensions.ManagedClient;
 
 namespace Base10.SparkplugB.Core.Services
 {

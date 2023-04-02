@@ -8,7 +8,6 @@
   <ItemGroup>
     <PackageReference Include="Google.Protobuf" Version="3.22.1" />
     <PackageReference Include="MQTTnet" Version="4.1.4.563" />
-    <PackageReference Include="MQTTnet.Extensions.ManagedClient" Version="4.1.4.563" />
   </ItemGroup>
 
 </Project>

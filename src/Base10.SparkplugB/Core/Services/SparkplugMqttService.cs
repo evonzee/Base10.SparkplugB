@@ -3,7 +3,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using MQTTnet;
 using MQTTnet.Client;
-using MQTTnet.Extensions.ManagedClient;
 using MQTTnet.Internal; // unfortunate.. would be nice to break out the async event stuff
 
 namespace Base10.SparkplugB.Core.Services
@@ -35,11 +34,6 @@ namespace Base10.SparkplugB.Core.Services
 		{
 			this.NextBirthSequence(); // tie this to connect only and not birth due to [tck-id-payloads-nbirth-bdseq-repeat].  Could move into Edge node ConfigureLastWill implementation?
 			var options = ConfigureLastWill(_mqttOptionsBuilder).Build();
-
-			var managedOptions = new ManagedMqttClientOptionsBuilder()
-				.WithAutoReconnectDelay(TimeSpan.FromSeconds(5))
-				.WithClientOptions(options)
-				.Build();
 
 			// add handlers
 			_mqttClient.ConnectedAsync += OnConnected;
