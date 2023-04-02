@@ -11,10 +11,11 @@ namespace Base10.SparkplugB.Core.Services
 	public abstract class SparkplugMqttService
 	{
 		protected readonly MqttClientOptionsBuilder _mqttOptionsBuilder;
-		protected readonly IManagedMqttClient _mqttClient = new MqttFactory().CreateManagedMqttClient();
+		protected readonly IMqttClient _mqttClient = new MqttFactory().CreateMqttClient();
 		protected readonly string _group;
 		private long _sequence = -1; // basically guarantee we won't overflow for the life of this program(mer)
 		private long _bdSequence = -1;
+		private bool _shouldReconnect = false;
 
 		public SparkplugMqttService(string serverHostname, int serverPort, bool useTls, string clientId, string username, string password, string group)
 		{
@@ -30,8 +31,9 @@ namespace Base10.SparkplugB.Core.Services
 			_group = group;
 		}
 
-		protected async Task StartAsync()
+		public async Task Connect()
 		{
+			this.NextBirthSequence(); // tie this to connect only and not birth due to [tck-id-payloads-nbirth-bdseq-repeat].  Could move into Edge node ConfigureLastWill implementation?
 			var options = ConfigureLastWill(_mqttOptionsBuilder).Build();
 
 			var managedOptions = new ManagedMqttClientOptionsBuilder()
@@ -44,14 +46,18 @@ namespace Base10.SparkplugB.Core.Services
 			_mqttClient.DisconnectedAsync += OnDisconnected;
 			_mqttClient.ApplicationMessageReceivedAsync += OnMessageReceived;
 
+			_shouldReconnect = true;
+
 			await this.OnBeforeStart().ConfigureAwait(false);
-			await _mqttClient.StartAsync(managedOptions).ConfigureAwait(false);
+			await _mqttClient.ConnectAsync(options);
 			await this.OnStarted().ConfigureAwait(false);
 		}
 
-		protected async Task StopAsync(bool cleanStop = false)
+		protected async Task Disconnect()
 		{
-			await _mqttClient.StopAsync(cleanStop).ConfigureAwait(false);
+			_shouldReconnect = false;
+			var options = new MqttFactory().CreateClientDisconnectOptionsBuilder().WithReason(MqttClientDisconnectReason.ServerShuttingDown).Build();
+			await _mqttClient.DisconnectAsync(options).ConfigureAwait(false);
 		}
 
 		protected virtual MqttClientOptionsBuilder ConfigureLastWill(MqttClientOptionsBuilder optionsBuilder)
@@ -150,6 +156,10 @@ namespace Base10.SparkplugB.Core.Services
 		private async Task OnDisconnected(MqttClientDisconnectedEventArgs arg)
 		{
 			await _disconnectedEvent.InvokeAsync(arg);
+			if(_shouldReconnect)
+			{
+				await this.Connect();
+			}
 		}
 
 		private readonly AsyncEvent<EventArgs> _messageReceivedEvent = new AsyncEvent<EventArgs>();
