@@ -1,8 +1,6 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Base10.SparkplugB.Core.Data;
-using Base10.SparkplugB.Interfaces;
 using MQTTnet;
 using MQTTnet.Client;
 using MQTTnet.Extensions.ManagedClient;
@@ -44,7 +42,7 @@ namespace Base10.SparkplugB.Core.Services
 			// add handlers
 			_mqttClient.ConnectedAsync += OnConnected;
 			_mqttClient.DisconnectedAsync += OnDisconnected;
-
+			_mqttClient.ApplicationMessageReceivedAsync += OnMessageReceived;
 
 			await this.OnBeforeStart().ConfigureAwait(false);
 			await _mqttClient.StartAsync(managedOptions).ConfigureAwait(false);
@@ -152,6 +150,26 @@ namespace Base10.SparkplugB.Core.Services
 		private async Task OnDisconnected(MqttClientDisconnectedEventArgs arg)
 		{
 			await _disconnectedEvent.InvokeAsync(arg);
+		}
+
+		private readonly AsyncEvent<EventArgs> _messageReceivedEvent = new AsyncEvent<EventArgs>();
+		protected event Func<EventArgs, Task> MessageReceived
+		{
+			add
+			{
+				_messageReceivedEvent.AddHandler(value);
+			}
+			remove
+			{
+				_messageReceivedEvent.RemoveHandler(value);
+			}
+		}
+		private Task OnMessageReceived(MqttApplicationMessageReceivedEventArgs arg)
+		{
+			throw new NotImplementedException();
+			// parse sparkplug
+			// create the args for the event
+			// raise it
 		}
 
 
