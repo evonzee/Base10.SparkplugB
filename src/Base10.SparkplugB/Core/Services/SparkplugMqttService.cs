@@ -51,6 +51,7 @@ namespace Base10.SparkplugB.Core.Services
 		{
 			_shouldReconnect = false;
 			// TODO: need a disconnecting event so we can publish death messages
+			// per [tck-id-host-topic-phid-death-payload-disconnect-clean] and [tck-id-host-topic-phid-death-payload-disconnect-with-no-disconnect-packet]
 			var options = new MqttFactory().CreateClientDisconnectOptionsBuilder().WithReason(MqttClientDisconnectReason.ServerShuttingDown).Build();
 			await _mqttClient.DisconnectAsync(options).ConfigureAwait(false);
 		}
