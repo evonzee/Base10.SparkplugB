@@ -50,6 +50,7 @@ namespace Base10.SparkplugB.Core.Services
 		protected async Task Disconnect()
 		{
 			_shouldReconnect = false;
+			// TODO: need a disconnecting event so we can publish death messages
 			var options = new MqttFactory().CreateClientDisconnectOptionsBuilder().WithReason(MqttClientDisconnectReason.ServerShuttingDown).Build();
 			await _mqttClient.DisconnectAsync(options).ConfigureAwait(false);
 		}
