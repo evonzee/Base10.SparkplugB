@@ -18,11 +18,14 @@ namespace Base10.SparkplugB.Core.Services
 		private long _sequence = -1; // basically guarantee we won't overflow for the life of this program(mer)
 		private long _bdSequence = -1;
 
-		public SparkplugMqttService(string mqttServerUri, string clientId, string username, string password, string group)
+		public SparkplugMqttService(string serverHostname, int serverPort, bool useTls, string clientId, string username, string password, string group)
 		{
 			_mqttOptionsBuilder = new MqttClientOptionsBuilder()
 				.WithClientId(clientId)
-				.WithTcpServer(mqttServerUri)
+				.WithTcpServer(serverHostname, serverPort)
+				.WithTls(o => {
+					o.UseTls = useTls;
+				})
 				.WithCredentials(username, password)
 				.WithCleanSession() // [tck-id-principles-persistence-clean-session-50]
 				.WithSessionExpiryInterval(0); // [tck-id-principles-persistence-clean-session-50]
@@ -40,6 +43,7 @@ namespace Base10.SparkplugB.Core.Services
 
 			// add handlers
 			_mqttClient.ConnectedAsync += OnConnected;
+			_mqttClient.DisconnectedAsync += OnDisconnected;
 
 
 			await this.OnBeforeStart().ConfigureAwait(false);
@@ -128,6 +132,24 @@ namespace Base10.SparkplugB.Core.Services
 		{
 			await _connectedEvent.InvokeAsync(arg);
 		}
+
+		private readonly AsyncEvent<EventArgs> _disconnectedEvent = new AsyncEvent<EventArgs>();
+		protected event Func<EventArgs, Task> Disconnected
+		{
+			add
+			{
+				_disconnectedEvent.AddHandler(value);
+			}
+			remove
+			{
+				_disconnectedEvent.RemoveHandler(value);
+			}
+		}
+		private async Task OnDisconnected(MqttClientDisconnectedEventArgs arg)
+		{
+			await _disconnectedEvent.InvokeAsync(arg);
+		}
+
 
 		#endregion
 	}

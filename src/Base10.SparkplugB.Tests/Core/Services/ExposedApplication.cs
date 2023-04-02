@@ -11,11 +11,11 @@ namespace Base10.SparkplugB.Tests.Core.Services
 	public class ExposedApplication : SparkplugApplication
 	{
 
-		public ExposedApplication() : base("", "", "", "", "")
+		public ExposedApplication() : base("", 0, false, "", "", "", "")
 		{
 		}
 
-		public ExposedApplication(string mqttServerUri, string clientId, string username, string password, string group) : base(mqttServerUri, clientId, username, password, group)
+		public ExposedApplication(string hostname, int port, bool useTls, string clientId, string username, string password, string group) : base(hostname, port, useTls, clientId, username, password, group)
 		{
 		}
 

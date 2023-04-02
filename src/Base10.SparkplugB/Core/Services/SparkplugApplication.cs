@@ -9,7 +9,7 @@ namespace Base10.SparkplugB.Core.Services
 {
 	public class SparkplugApplication : SparkplugMqttService
 	{
-		public SparkplugApplication(string mqttServerUri, string clientId, string username, string password, string group) : base(mqttServerUri, clientId, username, password, group)
+		public SparkplugApplication(string hostname, int port, bool useTls, string clientId, string username, string password, string group) : base(hostname, port, useTls, clientId, username, password, group)
 		{
 			this.Connected += OnConnected;
 		}
