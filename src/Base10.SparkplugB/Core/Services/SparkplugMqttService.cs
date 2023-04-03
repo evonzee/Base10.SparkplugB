@@ -7,7 +7,7 @@ using MQTTnet.Internal; // unfortunate.. would be nice to break out the async ev
 
 namespace Base10.SparkplugB.Core.Services
 {
-	public abstract class SparkplugMqttService
+	public abstract partial class SparkplugMqttService
 	{
 		protected readonly MqttClientOptionsBuilder _mqttOptionsBuilder;
 		protected readonly IMqttClient _mqttClient = new MqttFactory().CreateMqttClient();
@@ -21,7 +21,8 @@ namespace Base10.SparkplugB.Core.Services
 			_mqttOptionsBuilder = new MqttClientOptionsBuilder()
 				.WithClientId(clientId)
 				.WithTcpServer(serverHostname, serverPort)
-				.WithTls(o => {
+				.WithTls(o =>
+				{
 					o.UseTls = useTls;
 				})
 				.WithCredentials(username, password)
@@ -84,7 +85,7 @@ namespace Base10.SparkplugB.Core.Services
 
 		#endregion
 
-		#region Events
+		#region MQTT lifecycle Events
 
 		private readonly AsyncEvent<EventArgs> _beforeStartEvent = new AsyncEvent<EventArgs>();
 		protected event Func<EventArgs, Task> BeforeStart
@@ -152,32 +153,11 @@ namespace Base10.SparkplugB.Core.Services
 		private async Task OnDisconnected(MqttClientDisconnectedEventArgs arg)
 		{
 			await _disconnectedEvent.InvokeAsync(arg);
-			if(_shouldReconnect)
+			if (_shouldReconnect)
 			{
 				await this.Connect();
 			}
 		}
-
-		private readonly AsyncEvent<EventArgs> _messageReceivedEvent = new AsyncEvent<EventArgs>();
-		protected event Func<EventArgs, Task> MessageReceived
-		{
-			add
-			{
-				_messageReceivedEvent.AddHandler(value);
-			}
-			remove
-			{
-				_messageReceivedEvent.RemoveHandler(value);
-			}
-		}
-		private Task OnMessageReceived(MqttApplicationMessageReceivedEventArgs arg)
-		{
-			throw new NotImplementedException();
-			// parse sparkplug
-			// create the args for the event
-			// raise it
-		}
-
 
 		#endregion
 	}
