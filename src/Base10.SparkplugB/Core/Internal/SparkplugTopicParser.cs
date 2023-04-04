@@ -44,7 +44,7 @@ namespace Base10.SparkplugB.Core.Internal
 				case CommandType.DCMD:
 					return ParseDeviceCommand(topicParts, commandType);
 				default:
-					throw new ArgumentException($"Topic '{topic}' is not a valid Sparkplug topic", nameof(topic));
+					throw new ArgumentException($"Topic '{topic}' is not a valid Sparkplug topic: STATE commands must not include group.", nameof(topic));
 			}
 		}
 
