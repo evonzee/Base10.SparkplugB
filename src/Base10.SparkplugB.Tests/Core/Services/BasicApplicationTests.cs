@@ -14,7 +14,7 @@ namespace Base10.SparkplugB.Tests.Core.Services
 		[Fact]
 		public void CommandSequenceNumberIsThreadSafe()
 		{
-			var app = new Mock<ExposedApplication>()
+			var app = new Mock<ExposedSparkplugMqttService>()
 			{
 				CallBase = true
 			}.Object;
@@ -36,7 +36,7 @@ namespace Base10.SparkplugB.Tests.Core.Services
 		[Fact]
 		public void BirthSequenceNumberIsThreadSafe()
 		{
-			var app = new Mock<ExposedApplication>()
+			var app = new Mock<ExposedSparkplugMqttService>()
 			{
 				CallBase = true
 			}.Object;

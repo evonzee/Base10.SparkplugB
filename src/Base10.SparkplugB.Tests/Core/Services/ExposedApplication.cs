@@ -5,17 +5,22 @@ using System.Threading.Tasks;
 using Base10.SparkplugB.Core.Data;
 using Base10.SparkplugB.Core.Services;
 using Base10.SparkplugB.Interfaces;
+using MQTTnet.Client;
 
 namespace Base10.SparkplugB.Tests.Core.Services
 {
-	public class ExposedApplication : SparkplugApplication
+	public class ExposedSparkplugMqttService : SparkplugMqttService
 	{
 
-		public ExposedApplication() : base("", 0, false, "", "", "", "")
+		public ExposedSparkplugMqttService() : this("", 0, false, "", "", "", "", null)
 		{
 		}
 
-		public ExposedApplication(string hostname, int port, bool useTls, string clientId, string username, string password, string group) : base(hostname, port, useTls, clientId, username, password, group)
+		public ExposedSparkplugMqttService(IMqttClient client) : this("",0, false, "", "", "", "", client)
+		{
+		}
+
+		public ExposedSparkplugMqttService(string hostname, int port, bool useTls, string clientId, string username, string password, string group, IMqttClient? client) : base(hostname, port, useTls, clientId, username, password, group, client)
 		{
 		}
 

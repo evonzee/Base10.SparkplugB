@@ -10,16 +10,17 @@ namespace Base10.SparkplugB.Core.Services
 {
 	public abstract partial class SparkplugMqttService
 	{
-		protected readonly MqttClientOptionsBuilder _mqttOptionsBuilder;
-		protected readonly IMqttClient _mqttClient = new MqttFactory().CreateMqttClient();
 		protected readonly string _group;
+		protected readonly IMqttClient _mqttClient;
+		protected readonly MqttClientOptionsBuilder _mqttOptionsBuilder;
 		protected readonly ILogger<SparkplugMqttService>? _logger;
 		private long _sequence = -1; // basically guarantee we won't overflow for the life of this program(mer)
 		private long _bdSequence = -1;
 		private bool _shouldReconnect = false;
 
-		public SparkplugMqttService(string serverHostname, int serverPort, bool useTls, string clientId, string username, string password, string group, ILogger<SparkplugMqttService>? logger = null )
+		public SparkplugMqttService(string serverHostname, int serverPort, bool useTls, string clientId, string username, string password, string group, IMqttClient? mqttClient = null, ILogger<SparkplugMqttService>? logger = null )
 		{
+			_mqttClient = mqttClient ?? new MqttFactory().CreateMqttClient();
 			_mqttOptionsBuilder = new MqttClientOptionsBuilder()
 				.WithClientId(clientId)
 				.WithTcpServer(serverHostname, serverPort)
