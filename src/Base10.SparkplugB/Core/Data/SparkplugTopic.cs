@@ -11,7 +11,7 @@ namespace Base10.SparkplugB.Core.Data
 		public SparkplugTopic(CommandType command, string node, string? group = null, string? deviceId = null)
 		{
 			Command = command;
-			Node = node ?? throw new ArgumentNullException(nameof(node));;
+			Node = node ?? throw new ArgumentNullException(nameof(node)); ;
 			Group = group;
 			DeviceId = deviceId;
 		}

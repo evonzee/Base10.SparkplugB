@@ -1,6 +1,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using MQTTnet;
 using MQTTnet.Client;
 using MQTTnet.Internal; // unfortunate.. would be nice to break out the async event stuff
@@ -12,11 +13,12 @@ namespace Base10.SparkplugB.Core.Services
 		protected readonly MqttClientOptionsBuilder _mqttOptionsBuilder;
 		protected readonly IMqttClient _mqttClient = new MqttFactory().CreateMqttClient();
 		protected readonly string _group;
+		protected readonly ILogger<SparkplugMqttService>? _logger;
 		private long _sequence = -1; // basically guarantee we won't overflow for the life of this program(mer)
 		private long _bdSequence = -1;
 		private bool _shouldReconnect = false;
 
-		public SparkplugMqttService(string serverHostname, int serverPort, bool useTls, string clientId, string username, string password, string group)
+		public SparkplugMqttService(string serverHostname, int serverPort, bool useTls, string clientId, string username, string password, string group, ILogger<SparkplugMqttService>? logger = null )
 		{
 			_mqttOptionsBuilder = new MqttClientOptionsBuilder()
 				.WithClientId(clientId)
@@ -29,6 +31,7 @@ namespace Base10.SparkplugB.Core.Services
 				.WithCleanSession() // [tck-id-principles-persistence-clean-session-50]
 				.WithSessionExpiryInterval(0); // [tck-id-principles-persistence-clean-session-50]
 			_group = group;
+			_logger = logger;
 		}
 
 		public async Task Connect()

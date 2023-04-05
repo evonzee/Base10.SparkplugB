@@ -46,7 +46,7 @@ namespace Base10.SparkplugB.Tests.Core.Internal
 		{
 			var results = new List<SparkplugTopic>();
 			var parser = new SparkplugTopicParser();
-			for( var i = 0; i < 10; i++)
+			for (var i = 0; i < 10; i++)
 			{
 				results.Add(parser.Parse(topic));
 			}
