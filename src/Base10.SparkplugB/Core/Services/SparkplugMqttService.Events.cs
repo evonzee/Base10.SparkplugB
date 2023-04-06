@@ -15,7 +15,7 @@ namespace Base10.SparkplugB.Core.Services
 		private readonly SparkplugMessageParser _messageParser = new();
 
 		// receive messages from MQTT
-		private async Task OnMessageReceived(MqttApplicationMessageReceivedEventArgs arg)
+		protected async Task OnMessageReceived(MqttApplicationMessageReceivedEventArgs arg)
 		{
 			try
 			{
@@ -24,6 +24,7 @@ namespace Base10.SparkplugB.Core.Services
 			catch (Exception ex)
 			{
 				_logger?.LogError(ex, "Error processing message");
+				Console.WriteLine(ex.ToString());
 				var invalidArgs = new InvalidMessageReceivedEventEventArgs(arg.ApplicationMessage.Topic.ToString(), arg.ApplicationMessage.Payload);
 				await this.OnInvalidMessageReceived(invalidArgs);
 			}
@@ -31,23 +32,28 @@ namespace Base10.SparkplugB.Core.Services
 
 		private async Task OnMessageReceivedInternal(MqttApplicationMessageReceivedEventArgs arg)
 		{
+			arg.AutoAcknowledge = true;
 			var topic = _topicParser.Parse(arg.ApplicationMessage.Topic);
 			switch (topic.Command)
 			{
 				case Enums.CommandType.STATE:
 					var state = _messageParser.ParseState(arg.ApplicationMessage.Payload);
+					if(state == null) {
+						var invalidArgs = new InvalidMessageReceivedEventEventArgs(arg.ApplicationMessage.Topic.ToString(), arg.ApplicationMessage.Payload);
+						await this.OnInvalidMessageReceived(invalidArgs);
+						return;
+					}
 					var args = new NodeStateEventArgs(topic, state);
 					await OnStateMessageReceived(args);
 					break;
 				default:
 					throw new NotImplementedException();
 			}
-			await arg.AcknowledgeAsync(CancellationToken.None);
 		}
 
 
 		private readonly AsyncEvent<InvalidMessageReceivedEventEventArgs> _invalidMessageReceivedEvent = new();
-		protected event Func<InvalidMessageReceivedEventEventArgs, Task> InvalidMessageReceived
+		public event Func<InvalidMessageReceivedEventEventArgs, Task> InvalidMessageReceived
 		{
 			add
 			{
@@ -65,7 +71,7 @@ namespace Base10.SparkplugB.Core.Services
 
 
 		private readonly AsyncEvent<NodeStateEventArgs> _stateMessageReceivedEvent = new();
-		protected event Func<NodeStateEventArgs, Task> StateMessageReceived
+		public event Func<NodeStateEventArgs, Task> StateMessageReceived
 		{
 			add
 			{
