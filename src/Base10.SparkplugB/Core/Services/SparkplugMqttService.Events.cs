@@ -24,7 +24,6 @@ namespace Base10.SparkplugB.Core.Services
 			catch (Exception ex)
 			{
 				_logger?.LogError(ex, "Error processing message");
-				Console.WriteLine(ex.ToString());
 				var invalidArgs = new InvalidMessageReceivedEventEventArgs(arg.ApplicationMessage.Topic.ToString(), arg.ApplicationMessage.Payload);
 				await this.OnInvalidMessageReceived(invalidArgs);
 			}

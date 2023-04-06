@@ -39,5 +39,33 @@ namespace Base10.SparkplugB.Tests.Core.Services
 			results.State.Online.Should().Be(online);
 			results.State.TimestampAsDateTime.Should().BeCloseTo(DateTime.Parse(timestamp), TimeSpan.FromSeconds(1));
 		}
+
+
+		[Theory]
+		[InlineData("spBv1.0/STATE/bob", "{\"online\": \"true\", \"timestamp\": 1680702074814}")]
+		[InlineData("spBv1.0/STATE/bob", "trash")]
+		[InlineData("spBv1.0/asdf/bob", "trash")]
+		public async Task InvalidStateMessagesRaiseEvents(string topic, string message)
+		{
+			var service = new ExposedSparkplugMqttService();
+			InvalidMessageReceivedEventEventArgs results = null;
+			service.StateMessageReceived += (args) => throw new Exception("Valid message handler should not be called!");
+			service.InvalidMessageReceived += async (eventArgs) => results = eventArgs;
+
+			var args = new MqttApplicationMessageReceivedEventArgs(
+				"test",
+				new MqttApplicationMessageBuilder()
+					.WithTopic(topic)
+					.WithPayload(message)
+					.Build()
+				, new MQTTnet.Packets.MqttPublishPacket()
+				, null
+			);
+			Func<Task> action = async () => await service.OnMessageReceived(args);
+			await action.Should().NotThrowAsync();
+			results.Should().NotBeNull();
+			results.Topic.Should().Be(topic);
+			results.Payload.Should().Equal(System.Text.Encoding.UTF8.GetBytes(message));
+		}
 	}
 }
