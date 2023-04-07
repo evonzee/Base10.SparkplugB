@@ -51,15 +51,15 @@ namespace Base10.SparkplugB.Core.Internal
 
 		private SparkplugTopic ParseState(string[] topicParts)
 		{
-			return new SparkplugTopic(command: CommandType.STATE, node: topicParts[2]);
+			return new SparkplugTopic(Command: CommandType.STATE, Node: topicParts[2]);
 		}
 		private SparkplugTopic ParseNodeCommand(string[] topicParts, CommandType commandType)
 		{
-			return new SparkplugTopic(command: commandType, node: topicParts[3], group: topicParts[1]);
+			return new SparkplugTopic(Command: commandType, Node: topicParts[3], Group: topicParts[1]);
 		}
 		private SparkplugTopic ParseDeviceCommand(string[] topicParts, CommandType commandType)
 		{
-			return new SparkplugTopic(command: commandType, node: topicParts[3], group: topicParts[1], deviceId: topicParts[4]);
+			return new SparkplugTopic(Command: commandType, Node: topicParts[3], Group: topicParts[1], DeviceId: topicParts[4]);
 		}
 
 	}

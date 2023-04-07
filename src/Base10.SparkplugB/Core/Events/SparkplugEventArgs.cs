@@ -14,5 +14,10 @@ namespace Base10.SparkplugB.Core.Events
 
 		public SparkplugTopic Topic { get; }
 		public Payload Payload { get; }
+
+		public override string ToString()
+		{
+			return $"Sparkplug Event: {Topic} sequence {Payload.Seq}: {Payload}";
+		}
 	}
 }

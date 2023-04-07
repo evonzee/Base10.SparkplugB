@@ -6,18 +6,11 @@ using Base10.SparkplugB.Core.Enums;
 
 namespace Base10.SparkplugB.Core.Data
 {
-	public readonly struct SparkplugTopic
+	public record SparkplugTopic(CommandType Command, string Node, string? Group = null, string? DeviceId = null)
 	{
-		public SparkplugTopic(CommandType command, string node, string? group = null, string? deviceId = null)
+		public override string ToString()
 		{
-			Command = command;
-			Node = node ?? throw new ArgumentNullException(nameof(node)); ;
-			Group = group;
-			DeviceId = deviceId;
+			return $"{Command} for {Group}/{Node}/{DeviceId}";
 		}
-		public readonly CommandType Command { get; }
-		public readonly string Node { get; }
-		public readonly string? Group { get; }
-		public readonly string? DeviceId { get; }
 	}
 }
