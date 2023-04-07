@@ -15,7 +15,7 @@ namespace Base10.SparkplugB.Core.Services
 		private readonly SparkplugTopicParser _topicParser = new();
 		private readonly SparkplugMessageParser _messageParser = new();
 
-		// receive messages from MQTT
+		// receive messages from MQTT and catch exceptions to raise an invalid event
 		protected async Task OnMessageReceived(MqttApplicationMessageReceivedEventArgs arg)
 		{
 			try
@@ -38,14 +38,16 @@ namespace Base10.SparkplugB.Core.Services
 			{
 				case Enums.CommandType.STATE:
 					var state = _messageParser.ParseState(arg.ApplicationMessage.Payload);
-					await FireEvent(arg, state, async () => {;
+					await FireEvent(arg, state, async () =>
+					{
 						var args = new NodeStateEventArgs(topic, state);
 						await OnStateMessageReceived(args);
 					});
 					break;
 				case Enums.CommandType.NBIRTH:
 					var payload = _messageParser.ParseSparkplug(arg.ApplicationMessage.Payload);
-					await FireEvent(arg, payload, async () => {;
+					await FireEvent(arg, payload, async () =>
+					{
 						var args = new SparkplugEventArgs(topic, payload);
 						await OnNodeBirthReceived(args);
 					});
@@ -55,17 +57,21 @@ namespace Base10.SparkplugB.Core.Services
 			}
 		}
 
+		// function to fire the actual event unless the payload is null, in which case fire invalid
 		private async Task FireEvent<T>(MqttApplicationMessageReceivedEventArgs arg, T? state, Func<Task> handler)
 		{
 			if (state != null)
 			{
 				await handler();
-			} else {
+			}
+			else
+			{
 				var invalidArgs = new InvalidMessageReceivedEventEventArgs(arg.ApplicationMessage.Topic.ToString(), arg.ApplicationMessage.Payload);
 				await this.OnInvalidMessageReceived(invalidArgs);
 			}
 		}
 
+		// Invalid message
 		private readonly AsyncEvent<InvalidMessageReceivedEventEventArgs> _invalidMessageReceivedEvent = new();
 		public event Func<InvalidMessageReceivedEventEventArgs, Task> InvalidMessageReceived
 		{
@@ -78,12 +84,12 @@ namespace Base10.SparkplugB.Core.Services
 				_invalidMessageReceivedEvent.RemoveHandler(value);
 			}
 		}
-		private async Task OnInvalidMessageReceived(InvalidMessageReceivedEventEventArgs args)
+		protected virtual async Task OnInvalidMessageReceived(InvalidMessageReceivedEventEventArgs args)
 		{
 			await _invalidMessageReceivedEvent.InvokeAsync(args);
 		}
 
-
+		//  Node State
 		private readonly AsyncEvent<NodeStateEventArgs> _stateMessageReceivedEvent = new();
 		public event Func<NodeStateEventArgs, Task> StateMessageReceived
 		{
@@ -96,12 +102,12 @@ namespace Base10.SparkplugB.Core.Services
 				_stateMessageReceivedEvent.RemoveHandler(value);
 			}
 		}
-		private async Task OnStateMessageReceived(NodeStateEventArgs args)
+		protected virtual async Task OnStateMessageReceived(NodeStateEventArgs args)
 		{
 			await _stateMessageReceivedEvent.InvokeAsync(args);
 		}
 
-
+		// Node Birth
 		private readonly AsyncEvent<SparkplugEventArgs> _nodeBirthReceivedEvent = new();
 		public event Func<SparkplugEventArgs, Task> NodeBirthReceived
 		{
@@ -114,7 +120,7 @@ namespace Base10.SparkplugB.Core.Services
 				_nodeBirthReceivedEvent.RemoveHandler(value);
 			}
 		}
-		private async Task OnNodeBirthReceived(SparkplugEventArgs args)
+		protected virtual async Task OnNodeBirthReceived(SparkplugEventArgs args)
 		{
 			await _nodeBirthReceivedEvent.InvokeAsync(args);
 		}

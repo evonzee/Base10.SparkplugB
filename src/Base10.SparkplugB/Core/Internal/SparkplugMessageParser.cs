@@ -1,6 +1,6 @@
 using System;
-using Base10.SparkplugB.Core.Data;
 using System.Text.Json;
+using Base10.SparkplugB.Core.Data;
 using Base10.SparkplugB.Protocol;
 
 namespace Base10.SparkplugB.Core.Internal

@@ -18,7 +18,7 @@ namespace Base10.SparkplugB.Core.Services
 		private long _bdSequence = -1;
 		private bool _shouldReconnect = false;
 
-		public SparkplugMqttService(string serverHostname, int serverPort, bool useTls, string clientId, string username, string password, string group, IMqttClient? mqttClient = null, ILogger<SparkplugMqttService>? logger = null )
+		public SparkplugMqttService(string serverHostname, int serverPort, bool useTls, string clientId, string username, string password, string group, IMqttClient? mqttClient = null, ILogger<SparkplugMqttService>? logger = null)
 		{
 			_mqttClient = mqttClient ?? new MqttFactory().CreateMqttClient();
 			_mqttOptionsBuilder = new MqttClientOptionsBuilder()

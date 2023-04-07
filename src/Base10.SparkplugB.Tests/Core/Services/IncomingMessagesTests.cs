@@ -2,8 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Base10.SparkplugB.Core.Enums;
 using Base10.SparkplugB.Core.Events;
+using Base10.SparkplugB.Protocol;
 using FluentAssertions;
+using Google.Protobuf;
 using Moq;
 using MQTTnet;
 using MQTTnet.Client;
@@ -40,7 +43,6 @@ namespace Base10.SparkplugB.Tests.Core.Services
 			results.State.TimestampAsDateTime.Should().BeCloseTo(DateTime.Parse(timestamp), TimeSpan.FromSeconds(1));
 		}
 
-
 		[Theory]
 		[InlineData("spBv1.0/STATE/bob", "{\"online\": \"true\", \"timestamp\": 1680702074814}")]
 		[InlineData("spBv1.0/STATE/bob", "trash")]
@@ -67,5 +69,33 @@ namespace Base10.SparkplugB.Tests.Core.Services
 			results.Topic.Should().Be(topic);
 			results.Payload.Should().Equal(System.Text.Encoding.UTF8.GetBytes(message));
 		}
+
+		[Theory]
+		[InlineData("spBv1.0/validsparkplug/NBIRTH/nodeid", new byte[] { 0x10, 0x0A }, "validsparkplug", "nodeid", null, CommandType.NBIRTH)]
+		public async Task ValidSparkplugMessagesParseOk(string topic, byte[] payload, string group, string node, string device, CommandType type)
+		{
+			var service = new ExposedSparkplugMqttService();
+			SparkplugEventArgs results = null;
+			service.NodeBirthReceived += async (eventArgs) => results = eventArgs;
+			service.InvalidMessageReceived += (args) => throw new Exception("Invalid message handler should not be called!");
+
+			var args = new MqttApplicationMessageReceivedEventArgs(
+				"test",
+				new MqttApplicationMessageBuilder()
+					.WithTopic(topic)
+					.WithPayload(payload)
+					.Build()
+				, new MQTTnet.Packets.MqttPublishPacket()
+				, null
+			);
+			Func<Task> action = async () => await service.OnMessageReceived(args);
+			await action.Should().NotThrowAsync();
+			results.Should().NotBeNull();
+			results.Topic.Node.Should().Be(node);
+			results.Topic.Group.Should().Be(group);
+			results.Topic.DeviceId.Should().Be(device);
+			results.Topic.Command.Should().Be(type);
+		}
+
 	}
 }
