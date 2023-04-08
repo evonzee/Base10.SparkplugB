@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using MQTTnet.Client;
+using System.Text.Json;
 
 namespace Base10.SparkplugB.Core.Services
 {
@@ -22,9 +23,16 @@ namespace Base10.SparkplugB.Core.Services
 			// await SendBirthSequence(_mqttClient); // apps must satisfy [tck-id-components-ph-state]
 		}
 
-		protected override MqttClientOptionsBuilder ConfigureLastWill(MqttClientOptionsBuilder optionsBuilder)
+		protected override MqttClientOptionsBuilder ConfigureLastWill(MqttClientOptionsBuilder builder)
 		{
-			throw new NotImplementedException();
+			var willPayload = new { online = false, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }; // [tck-id-host-topic-phid-death-payload-connect]
+			return builder
+				.WithWillContentType("application/json")
+				.WithWillDelayInterval(0)
+				.WithWillPayload(JsonSerializer.Serialize(willPayload)) //[tck-id-host-topic-phid-death-payload]
+				.WithWillRetain(true) // [tck-id-host-topic-phid-death-retain]
+				.WithWillQualityOfServiceLevel(MQTTnet.Protocol.MqttQualityOfServiceLevel.AtLeastOnce) // [tck-id-host-topic-phid-death-qos]
+				;
 		}
 
 
