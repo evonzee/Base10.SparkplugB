@@ -1,12 +1,13 @@
 using System;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using MQTTnet.Client;
 
 namespace Base10.SparkplugB.Core.Services
 {
 	public class SparkplugApplication : SparkplugMqttService
 	{
-		public SparkplugApplication(string hostname, int port, bool useTls, string clientId, string username, string password, string group) : base(hostname, port, useTls, clientId, username, password, group)
+		public SparkplugApplication(string hostname, int port, bool useTls, string clientId, string username, string password, string group, IMqttClient? mqttClient = null, ILogger? logger = null) : base(hostname, port, useTls, clientId, username, password, group, mqttClient, logger)
 		{
 			this.Connected += OnConnected;
 		}
