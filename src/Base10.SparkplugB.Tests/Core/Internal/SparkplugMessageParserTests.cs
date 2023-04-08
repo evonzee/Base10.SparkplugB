@@ -46,7 +46,8 @@ namespace Base10.SparkplugB.Tests.Core.Internal
 		[InlineData(1785)]
 		public void SparkplugMessagesWithNoMetricsParse(ulong seq)
 		{
-			var payload = new Payload {
+			var payload = new Payload
+			{
 				Seq = seq
 			};
 			using var stream = new MemoryStream();

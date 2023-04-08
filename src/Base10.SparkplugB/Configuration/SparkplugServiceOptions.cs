@@ -5,7 +5,8 @@ using System.Threading.Tasks;
 
 namespace Base10.SparkplugB.Configuration
 {
-    public record SparkplugServiceOptions {
+	public record SparkplugServiceOptions
+	{
 
 		public string ServerHostname { get; init; } = "";
 		public int ServerPort { get; init; } = 1883;

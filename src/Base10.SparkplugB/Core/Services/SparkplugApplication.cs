@@ -1,9 +1,9 @@
 using System;
+using System.Text.Json;
 using System.Threading.Tasks;
+using Base10.SparkplugB.Configuration;
 using Microsoft.Extensions.Logging;
 using MQTTnet.Client;
-using System.Text.Json;
-using Base10.SparkplugB.Configuration;
 
 namespace Base10.SparkplugB.Core.Services
 {

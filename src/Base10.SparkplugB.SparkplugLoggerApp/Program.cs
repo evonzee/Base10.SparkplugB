@@ -1,4 +1,4 @@
-﻿
+
 using Base10.SparkplugB.Configuration;
 using Base10.SparkplugB.SparkplugLoggerApp;
 using Microsoft.Extensions.Configuration;
