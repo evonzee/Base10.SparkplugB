@@ -6,3 +6,4 @@
 /**/obj/
 _site
 /**/TestResults
+/**/appsettings.secrets.json
