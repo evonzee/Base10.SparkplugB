@@ -23,7 +23,7 @@ namespace Base10.SparkplugB.Benchmarks.Core
 	public class SequenceNumberLocking
 	{
 		private int _sequenceLocked;
-		private object _sequenceLock;
+		private object _sequenceLock = new object();
 		private long _sequenceInterlocked;
 
 		[GlobalSetup]
