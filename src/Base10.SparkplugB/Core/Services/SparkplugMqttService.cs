@@ -1,6 +1,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Base10.SparkplugB.Configuration;
 using Microsoft.Extensions.Logging;
 using MQTTnet;
 using MQTTnet.Client;
@@ -18,20 +19,20 @@ namespace Base10.SparkplugB.Core.Services
 		private long _bdSequence = -1;
 		private bool _shouldReconnect = false;
 
-		public SparkplugMqttService(string serverHostname, int serverPort, bool useTls, string clientId, string username, string password, string group, IMqttClient? mqttClient = null, ILogger? logger = null)
+		public SparkplugMqttService(SparkplugServiceOptions config, IMqttClient? mqttClient = null, ILogger? logger = null)
 		{
 			_mqttClient = mqttClient ?? new MqttFactory().CreateMqttClient();
 			_mqttOptionsBuilder = new MqttClientOptionsBuilder()
-				.WithClientId(clientId)
-				.WithTcpServer(serverHostname, serverPort)
+				.WithClientId(config.ClientId)
+				.WithTcpServer(config.ServerHostname, config.ServerPort)
 				.WithTls(o =>
 				{
-					o.UseTls = useTls;
+					o.UseTls = config.UseTls;
 				})
-				.WithCredentials(username, password)
+				.WithCredentials(config.Username, config.Password)
 				.WithCleanSession() // [tck-id-principles-persistence-clean-session-50]
 				.WithSessionExpiryInterval(0); // [tck-id-principles-persistence-clean-session-50]
-			_group = group;
+			_group = config.Group;
 			_logger = logger;
 		}
 
