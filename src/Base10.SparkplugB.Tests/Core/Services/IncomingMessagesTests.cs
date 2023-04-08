@@ -1,16 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Base10.SparkplugB.Core.Enums;
 using Base10.SparkplugB.Core.Events;
-using Base10.SparkplugB.Protocol;
 using FluentAssertions;
-using Google.Protobuf;
-using Moq;
 using MQTTnet;
 using MQTTnet.Client;
-using Xunit;
 
 namespace Base10.SparkplugB.Tests.Core.Services
 {
@@ -22,8 +13,8 @@ namespace Base10.SparkplugB.Tests.Core.Services
 		public async Task ValidStateMessagesRaiseEvents(string message, bool online, string timestamp)
 		{
 			var service = new ExposedSparkplugMqttService();
-			NodeStateEventArgs results = null;
-			service.StateMessageReceived += async (eventArgs) => results = eventArgs;
+			NodeStateEventArgs? results = null;
+			service.StateMessageReceived += (eventArgs) => { results = eventArgs; return Task.CompletedTask; };
 			service.InvalidMessageReceived += (args) => throw new Exception("Invalid message handler should not be called!");
 
 			var args = new MqttApplicationMessageReceivedEventArgs(
@@ -38,9 +29,9 @@ namespace Base10.SparkplugB.Tests.Core.Services
 			Func<Task> action = async () => await service.OnMessageReceived(args);
 			await action.Should().NotThrowAsync();
 			results.Should().NotBeNull();
-			results.Topic.Node.Should().Be("bob");
-			results.State.Online.Should().Be(online);
-			results.State.TimestampAsDateTime.Should().BeCloseTo(DateTime.Parse(timestamp), TimeSpan.FromSeconds(1));
+			results?.Topic.Node.Should().Be("bob");
+			results?.State.Online.Should().Be(online);
+			results?.State.TimestampAsDateTime.Should().BeCloseTo(DateTime.Parse(timestamp), TimeSpan.FromSeconds(1));
 		}
 
 		[Theory]
@@ -50,9 +41,9 @@ namespace Base10.SparkplugB.Tests.Core.Services
 		public async Task InvalidStateMessagesRaiseEvents(string topic, string message)
 		{
 			var service = new ExposedSparkplugMqttService();
-			InvalidMessageReceivedEventEventArgs results = null;
+			InvalidMessageReceivedEventEventArgs? results = null;
 			service.StateMessageReceived += (args) => throw new Exception("Valid message handler should not be called!");
-			service.InvalidMessageReceived += async (eventArgs) => results = eventArgs;
+			service.InvalidMessageReceived += (eventArgs) => { results = eventArgs; return Task.CompletedTask; };
 
 			var args = new MqttApplicationMessageReceivedEventArgs(
 				"test",
@@ -66,8 +57,8 @@ namespace Base10.SparkplugB.Tests.Core.Services
 			Func<Task> action = async () => await service.OnMessageReceived(args);
 			await action.Should().NotThrowAsync();
 			results.Should().NotBeNull();
-			results.Topic.Should().Be(topic);
-			results.Payload.Should().Equal(System.Text.Encoding.UTF8.GetBytes(message));
+			results?.Topic.Should().Be(topic);
+			results?.Payload.Should().Equal(System.Text.Encoding.UTF8.GetBytes(message));
 		}
 
 		// 0x180A is an empty message with sequence 10

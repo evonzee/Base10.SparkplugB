@@ -36,73 +36,73 @@ namespace Base10.SparkplugB.Core.Services
 			{
 				case Enums.CommandType.STATE:
 					var state = _messageParser.ParseState(arg.ApplicationMessage.Payload);
-					await FireEvent(arg, state, async () =>
+					await FireEvent(arg, state, async (s) =>
 					{
-						var args = new NodeStateEventArgs(topic, state);
+						var args = new NodeStateEventArgs(topic, s);
 						await OnStateMessageReceived(args);
 					});
 					break;
 				case Enums.CommandType.NBIRTH:
 					var payload = _messageParser.ParseSparkplug(arg.ApplicationMessage.Payload);
-					await FireEvent(arg, payload, async () =>
+					await FireEvent(arg, payload, async (p) =>
 					{
-						var args = new SparkplugEventArgs(topic, payload);
+						var args = new SparkplugEventArgs(topic, p);
 						await OnNodeBirthReceived(args);
 					});
 					break;
 				case Enums.CommandType.NDATA:
 					payload = _messageParser.ParseSparkplug(arg.ApplicationMessage.Payload);
-					await FireEvent(arg, payload, async () =>
+					await FireEvent(arg, payload, async (p) =>
 					{
-						var args = new SparkplugEventArgs(topic, payload);
+						var args = new SparkplugEventArgs(topic, p);
 						await OnNodeDataReceived(args);
 					});
 					break;
 				case Enums.CommandType.NDEATH:
 					payload = _messageParser.ParseSparkplug(arg.ApplicationMessage.Payload);
-					await FireEvent(arg, payload, async () =>
+					await FireEvent(arg, payload, async (p) =>
 					{
-						var args = new SparkplugEventArgs(topic, payload);
+						var args = new SparkplugEventArgs(topic, p);
 						await OnNodeDeathReceived(args);
 					});
 					break;
 				case Enums.CommandType.NCMD:
 					payload = _messageParser.ParseSparkplug(arg.ApplicationMessage.Payload);
-					await FireEvent(arg, payload, async () =>
+					await FireEvent(arg, payload, async (p) =>
 					{
-						var args = new SparkplugEventArgs(topic, payload);
+						var args = new SparkplugEventArgs(topic, p);
 						await OnNodeCommandReceived(args);
 					});
 					break;
 				case Enums.CommandType.DBIRTH:
 					payload = _messageParser.ParseSparkplug(arg.ApplicationMessage.Payload);
-					await FireEvent(arg, payload, async () =>
+					await FireEvent(arg, payload, async (p) =>
 					{
-						var args = new SparkplugEventArgs(topic, payload);
+						var args = new SparkplugEventArgs(topic, p);
 						await OnDeviceBirthReceived(args);
 					});
 					break;
 				case Enums.CommandType.DDATA:
 					payload = _messageParser.ParseSparkplug(arg.ApplicationMessage.Payload);
-					await FireEvent(arg, payload, async () =>
+					await FireEvent(arg, payload, async (p) =>
 					{
-						var args = new SparkplugEventArgs(topic, payload);
+						var args = new SparkplugEventArgs(topic, p);
 						await OnDeviceDataReceived(args);
 					});
 					break;
 				case Enums.CommandType.DDEATH:
 					payload = _messageParser.ParseSparkplug(arg.ApplicationMessage.Payload);
-					await FireEvent(arg, payload, async () =>
+					await FireEvent(arg, payload, async (p) =>
 					{
-						var args = new SparkplugEventArgs(topic, payload);
+						var args = new SparkplugEventArgs(topic, p);
 						await OnDeviceDeathReceived(args);
 					});
 					break;
 				case Enums.CommandType.DCMD:
 					payload = _messageParser.ParseSparkplug(arg.ApplicationMessage.Payload);
-					await FireEvent(arg, payload, async () =>
+					await FireEvent(arg, payload, async (p) =>
 					{
-						var args = new SparkplugEventArgs(topic, payload);
+						var args = new SparkplugEventArgs(topic, p);
 						await OnDeviceCommandReceived(args);
 					});
 					break;
@@ -112,11 +112,11 @@ namespace Base10.SparkplugB.Core.Services
 		}
 
 		// function to fire the actual event unless the payload is null, in which case fire invalid
-		private async Task FireEvent<T>(MqttApplicationMessageReceivedEventArgs arg, T? state, Func<Task> handler)
+		private async Task FireEvent<T>(MqttApplicationMessageReceivedEventArgs arg, T? state, Func<T, Task> handler)
 		{
 			if (state != null)
 			{
-				await handler();
+				await handler(state);
 			}
 			else
 			{
