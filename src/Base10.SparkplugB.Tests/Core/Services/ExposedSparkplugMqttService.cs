@@ -17,7 +17,7 @@ namespace Base10.SparkplugB.Tests.Core.Services
 		{
 		}
 
-		public ExposedSparkplugMqttService(IMqttClient? client) : this(new SparkplugServiceOptions("",0,false,"","","",""), client)
+		public ExposedSparkplugMqttService(IMqttClient? client) : this(new SparkplugServiceOptions(), client)
 		{
 		}
 
