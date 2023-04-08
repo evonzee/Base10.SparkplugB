@@ -1,11 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text.Json;
-using System.Threading.Tasks;
 using Base10.SparkplugB.Core.Internal;
+using Base10.SparkplugB.Protocol;
 using FluentAssertions;
-using Xunit;
+using Google.Protobuf;
 
 namespace Base10.SparkplugB.Tests.Core.Internal
 {
@@ -39,6 +36,26 @@ namespace Base10.SparkplugB.Tests.Core.Internal
 			Action act = () => parser.ParseState(bytes);
 
 			act.Should().Throw<JsonException>();
+		}
+
+		[Theory]
+		[InlineData(0)]
+		[InlineData(1)]
+		[InlineData(10)]
+		[InlineData(225)]
+		[InlineData(1785)]
+		public void SparkplugMessagesWithNoMetricsParse(ulong seq)
+		{
+			var payload = new Payload {
+				Seq = seq
+			};
+			using var stream = new MemoryStream();
+			payload.WriteTo(stream);
+
+			var parser = new SparkplugMessageParser();
+			var result = parser.ParseSparkplug(stream.ToArray());
+			result.Should().NotBeNull();
+			result?.Seq.Should().Be(seq);
 		}
 	}
 }
