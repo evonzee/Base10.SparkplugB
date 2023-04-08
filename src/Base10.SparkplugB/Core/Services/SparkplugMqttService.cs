@@ -48,7 +48,7 @@ namespace Base10.SparkplugB.Core.Services
 			_shouldReconnect = true;
 
 			await this.OnBeforeStart().ConfigureAwait(false);
-			await _mqttClient.ConnectAsync(options);
+			await _mqttClient.ConnectAsync(options).ConfigureAwait(false);
 			await this.OnStarted().ConfigureAwait(false);
 		}
 
@@ -105,7 +105,7 @@ namespace Base10.SparkplugB.Core.Services
 		}
 		private async Task OnBeforeStart()
 		{
-			await _beforeStartEvent.InvokeAsync(new EventArgs());
+			await _beforeStartEvent.InvokeAsync(new EventArgs()).ConfigureAwait(false);
 		}
 
 		private readonly AsyncEvent<EventArgs> _startedEvent = new AsyncEvent<EventArgs>();
@@ -122,7 +122,7 @@ namespace Base10.SparkplugB.Core.Services
 		}
 		private async Task OnStarted()
 		{
-			await _beforeStartEvent.InvokeAsync(new EventArgs());
+			await _beforeStartEvent.InvokeAsync(new EventArgs()).ConfigureAwait(false);
 		}
 
 		private readonly AsyncEvent<EventArgs> _connectedEvent = new AsyncEvent<EventArgs>();
@@ -139,7 +139,7 @@ namespace Base10.SparkplugB.Core.Services
 		}
 		private async Task OnConnected(MqttClientConnectedEventArgs arg)
 		{
-			await _connectedEvent.InvokeAsync(arg);
+			await _connectedEvent.InvokeAsync(arg).ConfigureAwait(false);
 		}
 
 		private readonly AsyncEvent<EventArgs> _disconnectedEvent = new AsyncEvent<EventArgs>();
@@ -156,10 +156,10 @@ namespace Base10.SparkplugB.Core.Services
 		}
 		private async Task OnDisconnected(MqttClientDisconnectedEventArgs arg)
 		{
-			await _disconnectedEvent.InvokeAsync(arg);
+			await _disconnectedEvent.InvokeAsync(arg).ConfigureAwait(false);
 			if (_shouldReconnect)
 			{
-				await this.Connect();
+				await this.Connect().ConfigureAwait(false);
 			}
 		}
 

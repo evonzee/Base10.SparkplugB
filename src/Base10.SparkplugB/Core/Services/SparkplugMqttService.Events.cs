@@ -18,13 +18,13 @@ namespace Base10.SparkplugB.Core.Services
 		{
 			try
 			{
-				await OnMessageReceivedInternal(arg);
+				await OnMessageReceivedInternal(arg).ConfigureAwait(false);
 			}
 			catch (Exception ex)
 			{
 				_logger?.LogError(ex, "Error processing message");
 				var invalidArgs = new InvalidMessageReceivedEventEventArgs(arg.ApplicationMessage.Topic.ToString(), arg.ApplicationMessage.Payload);
-				await this.OnInvalidMessageReceived(invalidArgs);
+				await this.OnInvalidMessageReceived(invalidArgs).ConfigureAwait(false);
 			}
 		}
 
@@ -39,72 +39,72 @@ namespace Base10.SparkplugB.Core.Services
 					await FireEvent(arg, state, async (s) =>
 					{
 						var args = new NodeStateEventArgs(topic, s);
-						await OnStateMessageReceived(args);
-					});
+						await OnStateMessageReceived(args).ConfigureAwait(false);
+					}).ConfigureAwait(false);
 					break;
 				case Enums.CommandType.NBIRTH:
 					var payload = _messageParser.ParseSparkplug(arg.ApplicationMessage.Payload);
 					await FireEvent(arg, payload, async (p) =>
 					{
 						var args = new SparkplugEventArgs(topic, p);
-						await OnNodeBirthReceived(args);
-					});
+						await OnNodeBirthReceived(args).ConfigureAwait(false);
+					}).ConfigureAwait(false);
 					break;
 				case Enums.CommandType.NDATA:
 					payload = _messageParser.ParseSparkplug(arg.ApplicationMessage.Payload);
 					await FireEvent(arg, payload, async (p) =>
 					{
 						var args = new SparkplugEventArgs(topic, p);
-						await OnNodeDataReceived(args);
-					});
+						await OnNodeDataReceived(args).ConfigureAwait(false);
+					}).ConfigureAwait(false);
 					break;
 				case Enums.CommandType.NDEATH:
 					payload = _messageParser.ParseSparkplug(arg.ApplicationMessage.Payload);
 					await FireEvent(arg, payload, async (p) =>
 					{
 						var args = new SparkplugEventArgs(topic, p);
-						await OnNodeDeathReceived(args);
-					});
+						await OnNodeDeathReceived(args).ConfigureAwait(false);
+					}).ConfigureAwait(false);
 					break;
 				case Enums.CommandType.NCMD:
 					payload = _messageParser.ParseSparkplug(arg.ApplicationMessage.Payload);
 					await FireEvent(arg, payload, async (p) =>
 					{
 						var args = new SparkplugEventArgs(topic, p);
-						await OnNodeCommandReceived(args);
-					});
+						await OnNodeCommandReceived(args).ConfigureAwait(false);
+					}).ConfigureAwait(false);
 					break;
 				case Enums.CommandType.DBIRTH:
 					payload = _messageParser.ParseSparkplug(arg.ApplicationMessage.Payload);
 					await FireEvent(arg, payload, async (p) =>
 					{
 						var args = new SparkplugEventArgs(topic, p);
-						await OnDeviceBirthReceived(args);
-					});
+						await OnDeviceBirthReceived(args).ConfigureAwait(false);
+					}).ConfigureAwait(false);
 					break;
 				case Enums.CommandType.DDATA:
 					payload = _messageParser.ParseSparkplug(arg.ApplicationMessage.Payload);
 					await FireEvent(arg, payload, async (p) =>
 					{
 						var args = new SparkplugEventArgs(topic, p);
-						await OnDeviceDataReceived(args);
-					});
+						await OnDeviceDataReceived(args).ConfigureAwait(false);
+					}).ConfigureAwait(false);
 					break;
 				case Enums.CommandType.DDEATH:
 					payload = _messageParser.ParseSparkplug(arg.ApplicationMessage.Payload);
 					await FireEvent(arg, payload, async (p) =>
 					{
 						var args = new SparkplugEventArgs(topic, p);
-						await OnDeviceDeathReceived(args);
-					});
+						await OnDeviceDeathReceived(args).ConfigureAwait(false);
+					}).ConfigureAwait(false);
 					break;
 				case Enums.CommandType.DCMD:
 					payload = _messageParser.ParseSparkplug(arg.ApplicationMessage.Payload);
 					await FireEvent(arg, payload, async (p) =>
 					{
 						var args = new SparkplugEventArgs(topic, p);
-						await OnDeviceCommandReceived(args);
-					});
+						await OnDeviceCommandReceived(args).ConfigureAwait(false);
+					}).ConfigureAwait(false);
 					break;
 				default:
 					throw new NotImplementedException();
@@ -116,12 +116,12 @@ namespace Base10.SparkplugB.Core.Services
 		{
 			if (state != null)
 			{
-				await handler(state);
+				await handler(state).ConfigureAwait(false);
 			}
 			else
 			{
 				var invalidArgs = new InvalidMessageReceivedEventEventArgs(arg.ApplicationMessage.Topic.ToString(), arg.ApplicationMessage.Payload);
-				await this.OnInvalidMessageReceived(invalidArgs);
+				await this.OnInvalidMessageReceived(invalidArgs).ConfigureAwait(false);
 			}
 		}
 
@@ -140,7 +140,7 @@ namespace Base10.SparkplugB.Core.Services
 		}
 		protected virtual async Task OnInvalidMessageReceived(InvalidMessageReceivedEventEventArgs args)
 		{
-			await _invalidMessageReceivedEvent.InvokeAsync(args);
+			await _invalidMessageReceivedEvent.InvokeAsync(args).ConfigureAwait(false);
 		}
 
 		//  Node State
@@ -158,7 +158,7 @@ namespace Base10.SparkplugB.Core.Services
 		}
 		protected virtual async Task OnStateMessageReceived(NodeStateEventArgs args)
 		{
-			await _stateMessageReceivedEvent.InvokeAsync(args);
+			await _stateMessageReceivedEvent.InvokeAsync(args).ConfigureAwait(false);
 		}
 
 		// Node Birth
@@ -176,7 +176,7 @@ namespace Base10.SparkplugB.Core.Services
 		}
 		protected virtual async Task OnNodeBirthReceived(SparkplugEventArgs args)
 		{
-			await _nodeBirthReceivedEvent.InvokeAsync(args);
+			await _nodeBirthReceivedEvent.InvokeAsync(args).ConfigureAwait(false);
 		}
 
 		// Node Data
@@ -194,7 +194,7 @@ namespace Base10.SparkplugB.Core.Services
 		}
 		protected virtual async Task OnNodeDataReceived(SparkplugEventArgs args)
 		{
-			await _nodeDataReceivedEvent.InvokeAsync(args);
+			await _nodeDataReceivedEvent.InvokeAsync(args).ConfigureAwait(false);
 		}
 
 		//Node Death
@@ -212,7 +212,7 @@ namespace Base10.SparkplugB.Core.Services
 		}
 		protected virtual async Task OnNodeDeathReceived(SparkplugEventArgs args)
 		{
-			await _nodeDeathReceivedEvent.InvokeAsync(args);
+			await _nodeDeathReceivedEvent.InvokeAsync(args).ConfigureAwait(false);
 		}
 
 		// Node Command
@@ -230,7 +230,7 @@ namespace Base10.SparkplugB.Core.Services
 		}
 		protected virtual async Task OnNodeCommandReceived(SparkplugEventArgs args)
 		{
-			await _nodeCommandReceivedEvent.InvokeAsync(args);
+			await _nodeCommandReceivedEvent.InvokeAsync(args).ConfigureAwait(false);
 		}
 
 		// Device Birth
@@ -248,7 +248,7 @@ namespace Base10.SparkplugB.Core.Services
 		}
 		protected virtual async Task OnDeviceBirthReceived(SparkplugEventArgs args)
 		{
-			await _deviceBirthReceivedEvent.InvokeAsync(args);
+			await _deviceBirthReceivedEvent.InvokeAsync(args).ConfigureAwait(false);
 		}
 
 		// Device Data
@@ -266,7 +266,7 @@ namespace Base10.SparkplugB.Core.Services
 		}
 		protected virtual async Task OnDeviceDataReceived(SparkplugEventArgs args)
 		{
-			await _deviceDataReceivedEvent.InvokeAsync(args);
+			await _deviceDataReceivedEvent.InvokeAsync(args).ConfigureAwait(false);
 		}
 
 		// Device Death
@@ -284,7 +284,7 @@ namespace Base10.SparkplugB.Core.Services
 		}
 		protected virtual async Task OnDeviceDeathReceived(SparkplugEventArgs args)
 		{
-			await _deviceDeathReceivedEvent.InvokeAsync(args);
+			await _deviceDeathReceivedEvent.InvokeAsync(args).ConfigureAwait(false);
 		}
 
 		// Device Command
@@ -302,7 +302,7 @@ namespace Base10.SparkplugB.Core.Services
 		}
 		protected virtual async Task OnDeviceCommandReceived(SparkplugEventArgs args)
 		{
-			await _deviceCommandReceivedEvent.InvokeAsync(args);
+			await _deviceCommandReceivedEvent.InvokeAsync(args).ConfigureAwait(false);
 		}
 	}
 }
