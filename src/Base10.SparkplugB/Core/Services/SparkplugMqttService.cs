@@ -56,7 +56,7 @@ namespace Base10.SparkplugB.Core.Services
 			await this.OnStarted().ConfigureAwait(false);
 		}
 
-		protected async Task Disconnect()
+		public async Task Disconnect()
 		{
 			_shouldReconnect = false;
 			// TODO: need a disconnecting event so we can publish death messages

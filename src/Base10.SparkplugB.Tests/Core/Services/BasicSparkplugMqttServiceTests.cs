@@ -10,7 +10,7 @@ using Xunit;
 
 namespace Base10.SparkplugB.Tests.Core.Services
 {
-	public class BasicApplicationTests
+	public class BasicSparkplugMqttServiceTests
 	{
 		[Fact]
 		public void CommandSequenceNumberIsThreadSafe()
