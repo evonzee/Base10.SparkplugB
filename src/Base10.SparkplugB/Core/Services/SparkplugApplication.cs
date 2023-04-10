@@ -12,11 +12,12 @@ namespace Base10.SparkplugB.Core.Services
 {
 	public class SparkplugApplication : SparkplugMqttService
 	{
-		private long _lastBirthTimestamp = 0;
+		private long _connectTimestamp = 0;
 
 		public SparkplugApplication(SparkplugServiceOptions options, IMqttClient? mqttClient = null, ILogger? logger = null) : base(options, mqttClient, logger)
 		{
 			this.Connected += OnConnected;
+			this.BeforeDisconnect += OnBeforeDisconnect;
 		}
 
 		private async Task OnConnected(EventArgs e)
@@ -29,10 +30,15 @@ namespace Base10.SparkplugB.Core.Services
 			await SendBirthSequence(_mqttClient); // apps must satisfy [tck-id-components-ph-state]
 		}
 
+		protected async Task OnBeforeDisconnect(EventArgs e)
+		{
+			await SendDeathSequence(_mqttClient);
+		}
+
 		protected override MqttClientOptionsBuilder ConfigureLastWill(MqttClientOptionsBuilder builder)
 		{
-			_lastBirthTimestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-			var willPayload = new { online = false, timestamp = _lastBirthTimestamp }; // [tck-id-host-topic-phid-death-payload-connect]
+			_connectTimestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+			var willPayload = new { online = false, timestamp = _connectTimestamp }; // [tck-id-host-topic-phid-death-payload-connect]
 			return builder
 				.WithWillContentType("application/json")
 				.WithWillDelayInterval(0)
@@ -56,10 +62,21 @@ namespace Base10.SparkplugB.Core.Services
 
 		private async Task SendBirthSequence(IMqttClient mqttClient)
 		{
-			var willPayload = new { online = true, timestamp = _lastBirthTimestamp };
+			var payload = new { online = true, timestamp = _connectTimestamp };
 			await mqttClient.PublishAsync(new MQTTnet.MqttApplicationMessageBuilder()
 				.WithTopic(new SparkplugTopic(CommandType.STATE, _nodeName).ToMqttTopic())
-				.WithPayload(JsonSerializer.Serialize(willPayload))
+				.WithPayload(JsonSerializer.Serialize(payload))
+				.WithQualityOfServiceLevel(MQTTnet.Protocol.MqttQualityOfServiceLevel.AtLeastOnce)
+				.WithRetainFlag(true)
+				.Build());
+		}
+
+		private async Task SendDeathSequence(IMqttClient mqttClient)
+		{
+			var payload = new { online = false, timestamp = _connectTimestamp };
+			await mqttClient.PublishAsync(new MQTTnet.MqttApplicationMessageBuilder()
+				.WithTopic(new SparkplugTopic(CommandType.STATE, _nodeName).ToMqttTopic())
+				.WithPayload(JsonSerializer.Serialize(payload))
 				.WithQualityOfServiceLevel(MQTTnet.Protocol.MqttQualityOfServiceLevel.AtLeastOnce)
 				.WithRetainFlag(true)
 				.Build());

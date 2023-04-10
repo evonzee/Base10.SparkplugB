@@ -59,7 +59,10 @@ namespace Base10.SparkplugB.Core.Services
 		public async Task Disconnect()
 		{
 			_shouldReconnect = false;
-			// TODO: need a disconnecting event so we can publish death messages
+
+			// provide a hook so death messages can be sent
+			await this.OnBeforeDisconnect().ConfigureAwait(false);
+
 			// per [tck-id-host-topic-phid-death-payload-disconnect-clean] and [tck-id-host-topic-phid-death-payload-disconnect-with-no-disconnect-packet]
 			var options = new MqttFactory().CreateClientDisconnectOptionsBuilder().WithReason(MqttClientDisconnectReason.ServerShuttingDown).Build();
 			await _mqttClient.DisconnectAsync(options).ConfigureAwait(false);
@@ -138,6 +141,23 @@ namespace Base10.SparkplugB.Core.Services
 		private async Task OnStarted()
 		{
 			await _beforeStartEvent.InvokeAsync(new EventArgs()).ConfigureAwait(false);
+		}
+
+		private readonly AsyncEvent<EventArgs> _beforeDisconnectEvent = new AsyncEvent<EventArgs>();
+		protected event Func<EventArgs, Task> BeforeDisconnect
+		{
+			add
+			{
+				_beforeDisconnectEvent.AddHandler(value);
+			}
+			remove
+			{
+				_beforeDisconnectEvent.RemoveHandler(value);
+			}
+		}
+		private async Task OnBeforeDisconnect()
+		{
+			await _beforeDisconnectEvent.InvokeAsync(new EventArgs()).ConfigureAwait(false);
 		}
 
 		private readonly AsyncEvent<EventArgs> _connectedEvent = new AsyncEvent<EventArgs>();
