@@ -12,6 +12,7 @@ namespace Base10.SparkplugB.Core.Services
 	public abstract partial class SparkplugMqttService
 	{
 		protected readonly string _group;
+		protected readonly string _nodeName;
 		protected readonly IMqttClient _mqttClient;
 		protected readonly MqttClientOptionsBuilder _mqttOptionsBuilder;
 		protected readonly ILogger? _logger;
@@ -33,6 +34,7 @@ namespace Base10.SparkplugB.Core.Services
 				.WithCleanSession() // [tck-id-principles-persistence-clean-session-50]
 				.WithSessionExpiryInterval(0); // [tck-id-principles-persistence-clean-session-50]
 			_group = config.Group;
+			_nodeName = config.NodeName;
 			_logger = logger;
 		}
 
