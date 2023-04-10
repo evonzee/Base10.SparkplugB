@@ -37,17 +37,17 @@ namespace Base10.SparkplugB.Core.Services
 			_group = config.Group;
 			_nodeName = config.NodeName;
 			_logger = logger;
+
+			// add handlers
+			_mqttClient.ConnectedAsync += OnConnected;
+			_mqttClient.DisconnectedAsync += OnDisconnected;
+			_mqttClient.ApplicationMessageReceivedAsync += OnMessageReceived;
 		}
 
 		public async Task Connect()
 		{
 			this.NextBirthSequence(); // tie this to connect only and not birth due to [tck-id-payloads-nbirth-bdseq-repeat].  Could move into Edge node ConfigureLastWill implementation?
 			var options = ConfigureLastWill(_mqttOptionsBuilder).Build();
-
-			// add handlers
-			_mqttClient.ConnectedAsync += OnConnected;
-			_mqttClient.DisconnectedAsync += OnDisconnected;
-			_mqttClient.ApplicationMessageReceivedAsync += OnMessageReceived;
 
 			_shouldReconnect = true;
 
@@ -141,7 +141,7 @@ namespace Base10.SparkplugB.Core.Services
 		}
 
 		private readonly AsyncEvent<EventArgs> _connectedEvent = new AsyncEvent<EventArgs>();
-		protected event Func<EventArgs, Task> Connected
+		public event Func<EventArgs, Task> Connected
 		{
 			add
 			{
@@ -158,7 +158,7 @@ namespace Base10.SparkplugB.Core.Services
 		}
 
 		private readonly AsyncEvent<EventArgs> _disconnectedEvent = new AsyncEvent<EventArgs>();
-		protected event Func<EventArgs, Task> Disconnected
+		public event Func<EventArgs, Task> Disconnected
 		{
 			add
 			{
