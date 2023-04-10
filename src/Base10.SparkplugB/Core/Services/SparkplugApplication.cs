@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Base10.SparkplugB.Configuration;
 using Base10.SparkplugB.Core.Data;
 using Base10.SparkplugB.Core.Enums;
+using Base10.SparkplugB.Protocol;
 using Microsoft.Extensions.Logging;
 using MQTTnet.Client;
 
@@ -64,7 +65,25 @@ namespace Base10.SparkplugB.Core.Services
 				.Build());
 		}
 
+		public async Task SendNodeCommand(string node, Payload payload)
+		{
+			payload = PreparePayloadForTransmission(payload);
+			await _mqttClient.PublishAsync(new MQTTnet.MqttApplicationMessageBuilder()
+				.WithTopic(new SparkplugTopic(CommandType.NCMD, _group, node).ToMqttTopic())
+				.WithPayload(payload.ToByteArray())
+				.WithQualityOfServiceLevel(MQTTnet.Protocol.MqttQualityOfServiceLevel.AtMostOnce)
+				.Build());
+		}
 
+		public async Task SendDeviceCommand(string node, string device, Payload payload)
+		{
+			payload = PreparePayloadForTransmission(payload);
+			await _mqttClient.PublishAsync(new MQTTnet.MqttApplicationMessageBuilder()
+				.WithTopic(new SparkplugTopic(CommandType.DCMD, _group, node, device).ToMqttTopic())
+				.WithPayload(payload.ToByteArray())
+				.WithQualityOfServiceLevel(MQTTnet.Protocol.MqttQualityOfServiceLevel.AtMostOnce)
+				.Build());
+		}
 
 	}
 }

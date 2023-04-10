@@ -2,6 +2,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Base10.SparkplugB.Configuration;
+using Base10.SparkplugB.Protocol;
 using Microsoft.Extensions.Logging;
 using MQTTnet;
 using MQTTnet.Client;
@@ -69,25 +70,36 @@ namespace Base10.SparkplugB.Core.Services
 			return optionsBuilder;
 		}
 
+		protected virtual Payload PreparePayloadForTransmission(Payload payload)
+		{
+			payload.Seq = this.NextCommandSequence();
+			payload.Metrics.Add(new Payload.Types.Metric()
+			{
+				Name = "bdSeq",
+				IntValue = CurrentBirthSequence()
+			});
+			return payload;
+		}
+
 		#region Accessors for sequence numbers
 
-		protected int NextCommandSequence()
+		protected ulong NextCommandSequence()
 		{
 			Interlocked.Increment(ref _sequence);
-			return (int)(_sequence % 256);
+			return (ulong)(_sequence % 256);
 		}
 		protected void ResetCommandSequence()
 		{
 			Interlocked.Exchange(ref _sequence, -1);
 		}
-		protected int NextBirthSequence()
+		protected uint NextBirthSequence()
 		{
 			Interlocked.Increment(ref _bdSequence);
 			return CurrentBirthSequence();
 		}
-		public int CurrentBirthSequence()
+		public uint CurrentBirthSequence()
 		{
-			return (int)(_bdSequence % 256);
+			return (uint)(_bdSequence % 256);
 		}
 
 		#endregion

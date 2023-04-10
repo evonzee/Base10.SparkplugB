@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Base10.SparkplugB.Core.Data;
 using Base10.SparkplugB.Core.Services;
+using FluentAssertions;
 using Moq;
 using Xunit;
 
@@ -30,7 +31,7 @@ namespace Base10.SparkplugB.Tests.Core.Services
 				}));
 			}
 			Task.WaitAll(tasks.ToArray());
-			Assert.Equal(10000 % 256, app.NextCommandSequence());
+			app.NextCommandSequence().Should().Be(10000 % 256);
 		}
 
 		[Fact]
@@ -42,7 +43,7 @@ namespace Base10.SparkplugB.Tests.Core.Services
 			}.Object;
 
 			app.NextBirthSequence();
-			Assert.Equal(0, app.CurrentBirthSequence());
+			app.CurrentBirthSequence().Should().Be(0);
 
 			var tasks = new List<Task>();
 			for (int i = 0; i < 100; i++)
@@ -56,7 +57,7 @@ namespace Base10.SparkplugB.Tests.Core.Services
 				}));
 			}
 			Task.WaitAll(tasks.ToArray());
-			Assert.Equal(10000 % 256, app.CurrentBirthSequence());
+			app.CurrentBirthSequence().Should().Be(10000 % 256);
 		}
 	}
 }

@@ -11,6 +11,7 @@ namespace Base10.SparkplugB.Core.Internal
 		{
 			PropertyNameCaseInsensitive = true,
 		};
+
 		public NodeState? ParseState(byte[] applicationMessage)
 		{
 			return JsonSerializer.Deserialize<NodeState>(applicationMessage, _options);

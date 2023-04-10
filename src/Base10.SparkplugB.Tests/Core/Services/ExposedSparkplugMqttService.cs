@@ -25,12 +25,12 @@ namespace Base10.SparkplugB.Tests.Core.Services
 		{
 		}
 
-		public new int NextCommandSequence()
+		public new ulong NextCommandSequence()
 		{
 			return base.NextCommandSequence();
 		}
 
-		public new int NextBirthSequence()
+		public new ulong NextBirthSequence()
 		{
 			return base.NextBirthSequence();
 		}
