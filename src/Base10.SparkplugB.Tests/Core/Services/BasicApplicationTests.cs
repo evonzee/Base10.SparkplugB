@@ -2,6 +2,7 @@ using Base10.SparkplugB.Configuration;
 using Base10.SparkplugB.Core.Services;
 using FluentAssertions;
 using Moq;
+using MQTTnet;
 using MQTTnet.Client;
 using MQTTnet.Protocol;
 
@@ -27,9 +28,15 @@ namespace Base10.SparkplugB.Tests.Core.Services
 
 			var seq = new MockSequence();
 			mqttClient.InSequence(seq)
-				.Setup<Task>(m => m.SubscribeAsync(It.IsAny<MqttClientSubscribeOptions>(), It.IsAny<CancellationToken>()))
-				.Returns(Task.CompletedTask)
+				.Setup<Task<MqttClientSubscribeResult>>(m => m.SubscribeAsync(It.IsAny<MqttClientSubscribeOptions>(), It.IsAny<CancellationToken>()))
+				.Returns(Task.FromResult(new MqttClientSubscribeResult()))
 				.Verifiable();
+
+			mqttClient.InSequence(seq)
+				.Setup<Task<MqttClientPublishResult>>(m => m.PublishAsync(It.IsAny<MqttApplicationMessage>(), It.IsAny<CancellationToken>()))
+				.Returns(Task.FromResult(new MqttClientPublishResult()))
+				.Verifiable();
+
 
 			var app = new SparkplugApplication(new SparkplugServiceOptions(){
 				Group = "SomeGroup",
@@ -47,6 +54,13 @@ namespace Base10.SparkplugB.Tests.Core.Services
 					),
 					It.IsAny<CancellationToken>()
 				));
+
+			mqttClient.Verify(
+					m => m.PublishAsync(It.Is<MqttApplicationMessage>(
+						m => m.Topic == "spBv1.0/STATE/SomeNode"
+						&& m.ConvertPayloadToString().Contains("true")
+				), It.IsAny<CancellationToken>())
+			);
         }
     }
 }

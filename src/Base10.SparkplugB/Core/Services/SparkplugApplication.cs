@@ -22,12 +22,19 @@ namespace Base10.SparkplugB.Core.Services
 
 		private async Task OnConnected(EventArgs e)
 		{
+			try {
+
 			// subscribe to appropriate topics per configuration
 			// subscribe happens before birth, per [tck-id-host-topic-phid-birth-required]
 			await SubscribeInitial(_mqttClient);
 
 			// send birth message
 			await SendBirthSequence(_mqttClient); // apps must satisfy [tck-id-components-ph-state]
+			}
+			catch (Exception ex) {
+				_logger?.LogError(ex, "Failed to startup application!  Behavior may be somewhat strange.");
+				throw;
+			}
 		}
 
 		protected async Task OnBeforeDisconnect(EventArgs e)
