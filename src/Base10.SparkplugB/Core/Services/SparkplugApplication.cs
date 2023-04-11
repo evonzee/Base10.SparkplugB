@@ -65,18 +65,17 @@ namespace Base10.SparkplugB.Core.Services
 
 		private async Task SendBirthSequence(IMqttClient mqttClient)
 		{
-			var payload = new { online = true, timestamp = _connectTimestamp };
-			await mqttClient.PublishAsync(new MQTTnet.MqttApplicationMessageBuilder()
-				.WithTopic(new SparkplugTopic(CommandType.STATE, _nodeName).ToMqttTopic())
-				.WithPayload(JsonSerializer.Serialize(payload))
-				.WithQualityOfServiceLevel(MQTTnet.Protocol.MqttQualityOfServiceLevel.AtLeastOnce)
-				.WithRetainFlag(true)
-				.Build());
+			await SendStatus(mqttClient, true);
 		}
 
 		private async Task SendDeathSequence(IMqttClient mqttClient)
 		{
-			var payload = new { online = false, timestamp = _connectTimestamp };
+			await SendStatus(mqttClient, false);
+		}
+
+		private async Task SendStatus(IMqttClient mqttClient, bool state)
+		{
+			var payload = new { online = state, timestamp = _connectTimestamp };
 			await mqttClient.PublishAsync(new MQTTnet.MqttApplicationMessageBuilder()
 				.WithTopic(new SparkplugTopic(CommandType.STATE, _nodeName).ToMqttTopic())
 				.WithPayload(JsonSerializer.Serialize(payload))
