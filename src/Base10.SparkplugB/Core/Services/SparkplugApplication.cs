@@ -51,13 +51,16 @@ namespace Base10.SparkplugB.Core.Services
 
 		private async Task SubscribeInitial(IMqttClient mqttClient)
 		{
-			await mqttClient.SubscribeAsync(CommandType.STATE.GetSubscriptionPattern(), MQTTnet.Protocol.MqttQualityOfServiceLevel.AtMostOnce);
-			await mqttClient.SubscribeAsync(CommandType.NBIRTH.GetSubscriptionPattern(_group), MQTTnet.Protocol.MqttQualityOfServiceLevel.AtMostOnce);
-			await mqttClient.SubscribeAsync(CommandType.NDEATH.GetSubscriptionPattern(_group), MQTTnet.Protocol.MqttQualityOfServiceLevel.AtMostOnce);
-			await mqttClient.SubscribeAsync(CommandType.NDATA.GetSubscriptionPattern(_group), MQTTnet.Protocol.MqttQualityOfServiceLevel.AtMostOnce);
-			await mqttClient.SubscribeAsync(CommandType.DBIRTH.GetSubscriptionPattern(_group), MQTTnet.Protocol.MqttQualityOfServiceLevel.AtMostOnce);
-			await mqttClient.SubscribeAsync(CommandType.DDEATH.GetSubscriptionPattern(_group), MQTTnet.Protocol.MqttQualityOfServiceLevel.AtMostOnce);
-			await mqttClient.SubscribeAsync(CommandType.DDATA.GetSubscriptionPattern(_group), MQTTnet.Protocol.MqttQualityOfServiceLevel.AtMostOnce);
+			var options = new MqttClientSubscribeOptionsBuilder()
+				.WithTopicFilter(CommandType.STATE.GetSubscriptionPattern(), MQTTnet.Protocol.MqttQualityOfServiceLevel.AtMostOnce)
+				.WithTopicFilter(CommandType.NBIRTH.GetSubscriptionPattern(_group), MQTTnet.Protocol.MqttQualityOfServiceLevel.AtMostOnce)
+				.WithTopicFilter(CommandType.NDEATH.GetSubscriptionPattern(_group), MQTTnet.Protocol.MqttQualityOfServiceLevel.AtMostOnce)
+				.WithTopicFilter(CommandType.NDATA.GetSubscriptionPattern(_group), MQTTnet.Protocol.MqttQualityOfServiceLevel.AtMostOnce)
+				.WithTopicFilter(CommandType.DBIRTH.GetSubscriptionPattern(_group), MQTTnet.Protocol.MqttQualityOfServiceLevel.AtMostOnce)
+				.WithTopicFilter(CommandType.DDEATH.GetSubscriptionPattern(_group), MQTTnet.Protocol.MqttQualityOfServiceLevel.AtMostOnce)
+				.WithTopicFilter(CommandType.DDATA.GetSubscriptionPattern(_group), MQTTnet.Protocol.MqttQualityOfServiceLevel.AtMostOnce)
+				.Build();
+			await mqttClient.SubscribeAsync(options);
 		}
 
 		private async Task SendBirthSequence(IMqttClient mqttClient)
