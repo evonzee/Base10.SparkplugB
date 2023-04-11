@@ -26,18 +26,6 @@ namespace Base10.SparkplugB.Tests.Core.Services
 				.Raises(m => m.ConnectedAsync += null, new object[] { new MqttClientConnectedEventArgs(new MqttClientConnectResult()) })
 				.Verifiable();
 
-			var seq = new MockSequence();
-			mqttClient.InSequence(seq)
-				.Setup<Task<MqttClientSubscribeResult>>(m => m.SubscribeAsync(It.IsAny<MqttClientSubscribeOptions>(), It.IsAny<CancellationToken>()))
-				.Returns(Task.FromResult(new MqttClientSubscribeResult()))
-				.Verifiable();
-
-			mqttClient.InSequence(seq)
-				.Setup<Task<MqttClientPublishResult>>(m => m.PublishAsync(It.IsAny<MqttApplicationMessage>(), It.IsAny<CancellationToken>()))
-				.Returns(Task.FromResult(new MqttClientPublishResult()))
-				.Verifiable();
-
-
 			var app = new SparkplugApplication(new SparkplugServiceOptions(){
 				Group = "SomeGroup",
 				NodeName = "SomeNode"
@@ -62,5 +50,66 @@ namespace Base10.SparkplugB.Tests.Core.Services
 				), It.IsAny<CancellationToken>())
 			);
         }
+
+		[Fact]
+		public async Task GracefulDisconnectsSendDeath()
+		{
+			var mqttClient = new Mock<IMqttClient>();
+
+			mqttClient
+				.Setup<Task<MqttClientConnectResult>>(m => m.ConnectAsync(It.IsAny<MqttClientOptions>(), It.IsAny<CancellationToken>()))
+				.Returns(Task.FromResult(new MqttClientConnectResult()))
+				.Raises(m => m.ConnectedAsync += null, new object[] { new MqttClientConnectedEventArgs(new MqttClientConnectResult()) })
+				.Verifiable();
+
+
+			var app = new SparkplugApplication(new SparkplugServiceOptions(){
+				Group = "SomeGroup",
+				NodeName = "SomeNode"
+			}, mqttClient.Object);
+			await app.Connect();
+			await app.Disconnect();
+
+			mqttClient.Verify();
+			mqttClient.Verify(
+					m => m.PublishAsync(It.Is<MqttApplicationMessage>(
+						m => m.Topic == "spBv1.0/STATE/SomeNode"
+						&& m.ConvertPayloadToString().Contains("false")
+				), It.IsAny<CancellationToken>())
+			);
+		}
+
+		[Fact]
+		public async Task UnexpectedDisconnectRebirths()
+		{
+			var mqttClient = new Mock<IMqttClient>();
+
+			mqttClient
+				.Setup<Task<MqttClientConnectResult>>(m => m.ConnectAsync(It.IsAny<MqttClientOptions>(), It.IsAny<CancellationToken>()))
+				.Returns(Task.FromResult(new MqttClientConnectResult()))
+				.Raises(m => m.ConnectedAsync += null, new object[] { new MqttClientConnectedEventArgs(new MqttClientConnectResult()) })
+				.Verifiable();
+
+
+			var app = new SparkplugApplication(new SparkplugServiceOptions(){
+				Group = "SomeGroup",
+				NodeName = "SomeNode"
+			}, mqttClient.Object);
+			await app.Connect();
+
+			mqttClient.Raise(m => m.DisconnectedAsync += null, new object[] { new MqttClientDisconnectedEventArgs()});
+
+			mqttClient.Verify();
+			mqttClient.Verify(
+				m => m.PublishAsync(
+						It.Is<MqttApplicationMessage>(
+							m => m.Topic == "spBv1.0/STATE/SomeNode"
+							&& m.ConvertPayloadToString().Contains("true")
+					), It.IsAny<CancellationToken>()
+				),
+				Times.Exactly(2)
+			);
+		}
+
     }
 }
