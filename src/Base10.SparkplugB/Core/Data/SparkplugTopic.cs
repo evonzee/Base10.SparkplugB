@@ -8,7 +8,8 @@ namespace Base10.SparkplugB.Core.Data
 {
 	public record SparkplugTopic(CommandType Command, string Node, string? Group = null, string? DeviceId = null)
 	{
-		public string ToMqttTopic() {
+		public string ToMqttTopic()
+		{
 			return Command switch
 			{
 				CommandType.STATE => $"spBv1.0/STATE/{Node}",

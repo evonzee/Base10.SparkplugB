@@ -5,9 +5,9 @@ using System.Threading.Tasks;
 
 namespace Base10.SparkplugB.Core.Enums
 {
-    public static class CommandTypeMethods
-    {
-        public static string GetSubscriptionPattern(this CommandType commandType, string? group = null)
+	public static class CommandTypeMethods
+	{
+		public static string GetSubscriptionPattern(this CommandType commandType, string? group = null)
 		{
 			return commandType switch
 			{
@@ -16,5 +16,5 @@ namespace Base10.SparkplugB.Core.Enums
 				_ => throw new ArgumentOutOfRangeException(nameof(commandType), commandType, null),
 			};
 		}
-    }
+	}
 }

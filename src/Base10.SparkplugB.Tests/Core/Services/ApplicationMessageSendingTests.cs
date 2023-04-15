@@ -28,9 +28,10 @@ namespace Base10.SparkplugB.Tests.Core.Services
 				.Returns(Task.FromResult(new MqttClientPublishResult()));
 
 
-			var app = new SparkplugApplication(new SparkplugServiceOptions() { Group = "testgroup"}, mqttClient.Object);
+			var app = new SparkplugApplication(new SparkplugServiceOptions() { Group = "testgroup" }, mqttClient.Object);
 
-			Payload payload = new() {
+			Payload payload = new()
+			{
 				Seq = 0,
 			};
 			payload.Metrics.AddRange(metrics);
@@ -38,7 +39,7 @@ namespace Base10.SparkplugB.Tests.Core.Services
 
 			message.Should().NotBeNull();
 			var p = Payload.Parser.ParseFrom(message?.Payload);
-			p.Metrics.Count.Should().Be(metrics.Count+1);
+			p.Metrics.Count.Should().Be(metrics.Count + 1);
 			p.Metrics.Any(m => m.Name == "bdSeq").Should().BeTrue();
 			p.Metrics.Where(m => m.Name == "bdSeq").First().IntValue.Should().Be(app.CurrentBirthSequence());
 			message?.Topic.Should().Be("spBv1.0/testgroup/DCMD/node/device");
@@ -46,13 +47,13 @@ namespace Base10.SparkplugB.Tests.Core.Services
 			// send it again to make sure sequence increments
 			var lastSequence = payload.Seq;
 			await app.SendDeviceCommand("node", "device", payload);
-			payload.Seq.Should().Be(lastSequence+1);
-			p.Metrics.Count.Should().Be(metrics.Count+1); // make sure duplicate bdSeq is not added
+			payload.Seq.Should().Be(lastSequence + 1);
+			p.Metrics.Count.Should().Be(metrics.Count + 1); // make sure duplicate bdSeq is not added
 
 			// send it again as a node metric
 			await app.SendNodeCommand("node", payload);
-			payload.Seq.Should().Be(lastSequence+2);
-			p.Metrics.Count.Should().Be(metrics.Count+1);
+			payload.Seq.Should().Be(lastSequence + 2);
+			p.Metrics.Count.Should().Be(metrics.Count + 1);
 			message?.Topic.Should().Be("spBv1.0/testgroup/NCMD/node");
 		}
 
@@ -61,14 +62,15 @@ namespace Base10.SparkplugB.Tests.Core.Services
 			var metrics = new List<Metric>();
 			for (int i = 0; i < count; i++)
 			{
-				metrics.Add(new Metric() {
+				metrics.Add(new Metric()
+				{
 					Name = $"metric{i}",
 					StringValue = i.ToString(),
 					Datatype = (uint)DataType.Int64,
 				});
 			}
 
-			yield return new object[] {metrics};
+			yield return new object[] { metrics };
 		}
 	}
 }

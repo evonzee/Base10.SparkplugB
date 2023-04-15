@@ -44,7 +44,7 @@ namespace Base10.SparkplugB.Tests.Core.Services
 
 			app.Connect().Wait();
 
-			mqttClient.Raise(m => m.DisconnectedAsync += null, new object[] { new MqttClientDisconnectedEventArgs()});
+			mqttClient.Raise(m => m.DisconnectedAsync += null, new object[] { new MqttClientDisconnectedEventArgs() });
 
 			mqttClient.Verify(m => m.ConnectAsync(It.IsAny<MqttClientOptions>(), It.IsAny<CancellationToken>()), Times.Exactly(2));
 			mqttClient.Verify();

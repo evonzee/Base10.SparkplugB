@@ -8,11 +8,11 @@ using MQTTnet.Protocol;
 
 namespace Base10.SparkplugB.Tests.Core.Services
 {
-    public class BasicApplicationTests
-    {
-        [Fact]
-        public async Task ApplicationCompliesWithStartupSpec()
-        {
+	public class BasicApplicationTests
+	{
+		[Fact]
+		public async Task ApplicationCompliesWithStartupSpec()
+		{
 			var mqttClient = new Mock<IMqttClient>();
 			mqttClient
 				.Setup<Task<MqttClientConnectResult>>(m => m.ConnectAsync(It.Is<MqttClientOptions>(
@@ -26,7 +26,8 @@ namespace Base10.SparkplugB.Tests.Core.Services
 				.Raises(m => m.ConnectedAsync += null, new object[] { new MqttClientConnectedEventArgs(new MqttClientConnectResult()) })
 				.Verifiable();
 
-			var app = new SparkplugApplication(new SparkplugServiceOptions(){
+			var app = new SparkplugApplication(new SparkplugServiceOptions()
+			{
 				Group = "SomeGroup",
 				NodeName = "SomeNode"
 			}, mqttClient.Object);
@@ -49,7 +50,7 @@ namespace Base10.SparkplugB.Tests.Core.Services
 						&& m.ConvertPayloadToString().Contains("true")
 				), It.IsAny<CancellationToken>())
 			);
-        }
+		}
 
 		[Fact]
 		public async Task GracefulDisconnectsSendDeath()
@@ -63,7 +64,8 @@ namespace Base10.SparkplugB.Tests.Core.Services
 				.Verifiable();
 
 
-			var app = new SparkplugApplication(new SparkplugServiceOptions(){
+			var app = new SparkplugApplication(new SparkplugServiceOptions()
+			{
 				Group = "SomeGroup",
 				NodeName = "SomeNode"
 			}, mqttClient.Object);
@@ -91,13 +93,14 @@ namespace Base10.SparkplugB.Tests.Core.Services
 				.Verifiable();
 
 
-			var app = new SparkplugApplication(new SparkplugServiceOptions(){
+			var app = new SparkplugApplication(new SparkplugServiceOptions()
+			{
 				Group = "SomeGroup",
 				NodeName = "SomeNode"
 			}, mqttClient.Object);
 			await app.Connect();
 
-			mqttClient.Raise(m => m.DisconnectedAsync += null, new object[] { new MqttClientDisconnectedEventArgs()});
+			mqttClient.Raise(m => m.DisconnectedAsync += null, new object[] { new MqttClientDisconnectedEventArgs() });
 
 			mqttClient.Verify();
 			mqttClient.Verify(
@@ -111,5 +114,5 @@ namespace Base10.SparkplugB.Tests.Core.Services
 			);
 		}
 
-    }
+	}
 }
