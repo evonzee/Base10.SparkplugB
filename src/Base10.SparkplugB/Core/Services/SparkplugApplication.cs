@@ -95,7 +95,7 @@ namespace Base10.SparkplugB.Core.Services
 		{
 			payload = PreparePayloadForTransmission(payload);
 			await _mqttClient.PublishAsync(new MQTTnet.MqttApplicationMessageBuilder()
-				.WithTopic(new SparkplugTopic(CommandType.NCMD, _group, node).ToMqttTopic())
+				.WithTopic(new SparkplugTopic(CommandType.NCMD, node, _group).ToMqttTopic())
 				.WithPayload(payload.ToByteArray())
 				.WithQualityOfServiceLevel(MQTTnet.Protocol.MqttQualityOfServiceLevel.AtMostOnce)
 				.Build());
@@ -105,7 +105,7 @@ namespace Base10.SparkplugB.Core.Services
 		{
 			payload = PreparePayloadForTransmission(payload);
 			await _mqttClient.PublishAsync(new MQTTnet.MqttApplicationMessageBuilder()
-				.WithTopic(new SparkplugTopic(CommandType.DCMD, _group, node, device).ToMqttTopic())
+				.WithTopic(new SparkplugTopic(CommandType.DCMD, node, _group, device).ToMqttTopic())
 				.WithPayload(payload.ToByteArray())
 				.WithQualityOfServiceLevel(MQTTnet.Protocol.MqttQualityOfServiceLevel.AtMostOnce)
 				.Build());
