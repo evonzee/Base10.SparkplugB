@@ -38,7 +38,7 @@
 			"problemMatcher": "$msCompile"
 		},
 		{
-			"label": "test",
+			"label": "test-debug",
 			"type": "process",
 			"isBackground": true,
 			"command": "dotnet",
@@ -51,7 +51,6 @@
 					"VSTEST_HOST_DEBUG": "1"
 				},
 			},
-			"group": "test",
 			"presentation": {
 				"echo": true,
 				"reveal": "always",
@@ -59,6 +58,36 @@
 				"panel": "shared"
 			},
 			"problemMatcher": "$msCompile"
+		},
+		{
+			"label": "test",
+			"type": "shell",
+			"command": "dotnet",
+			"group": "test",
+			"args": [
+				"test",
+				"--collect:\"XPlat Code Coverage\"",
+				"--results-directory",
+				"./.coverage"
+			],
+			"options": {
+				"cwd": "${workspaceFolder}",
+			},
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared"
+			},
+			"problemMatcher": "$msCompile",
+			"dependsOn": [
+				"clean-test-coverage"
+			]
+		},
+		{
+			"label": "clean-test-coverage",
+			"type": "shell",
+			"command": "rm -rf ./.coverage",
 		}
 	]
 }

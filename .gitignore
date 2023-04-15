@@ -7,3 +7,4 @@
 _site
 /**/TestResults
 /**/appsettings.secrets.json
+/.coverage
