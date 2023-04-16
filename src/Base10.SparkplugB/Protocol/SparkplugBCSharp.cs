@@ -5,6 +5,7 @@
 #pragma warning disable 1591, 0612, 3021, 8981
 #region Designer generated code
 
+using System.Diagnostics.CodeAnalysis;
 using pb = global::Google.Protobuf;
 using pbc = global::Google.Protobuf.Collections;
 using pbr = global::Google.Protobuf.Reflection;
@@ -12,6 +13,7 @@ using scg = global::System.Collections.Generic;
 namespace Base10.SparkplugB.Protocol {
 
   /// <summary>Holder for reflection information generated from sparkplug_b_c_sharp.proto</summary>
+  [ExcludeFromCodeCoverage]
   public static partial class SparkplugBCSharpReflection {
 
     #region Descriptor
@@ -184,6 +186,7 @@ namespace Base10.SparkplugB.Protocol {
   #endregion
 
   #region Messages
+  [ExcludeFromCodeCoverage]
   public sealed partial class Payload : pb::IMessage<Payload>
   #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
       , pb::IBufferMessage
