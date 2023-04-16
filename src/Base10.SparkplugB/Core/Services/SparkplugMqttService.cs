@@ -110,7 +110,7 @@ namespace Base10.SparkplugB.Core.Services
 		#region MQTT lifecycle Events
 
 		private readonly AsyncEvent<EventArgs> _beforeStartEvent = new AsyncEvent<EventArgs>();
-		protected event Func<EventArgs, Task> BeforeStart
+		public event Func<EventArgs, Task> BeforeStart
 		{
 			add
 			{
@@ -127,7 +127,7 @@ namespace Base10.SparkplugB.Core.Services
 		}
 
 		private readonly AsyncEvent<EventArgs> _startedEvent = new AsyncEvent<EventArgs>();
-		protected event Func<EventArgs, Task> Started
+		public event Func<EventArgs, Task> Started
 		{
 			add
 			{
@@ -140,27 +140,10 @@ namespace Base10.SparkplugB.Core.Services
 		}
 		private async Task OnStarted()
 		{
-			await _beforeStartEvent.InvokeAsync(new EventArgs()).ConfigureAwait(false);
+			await _startedEvent.InvokeAsync(new EventArgs()).ConfigureAwait(false);
 		}
 
-		private readonly AsyncEvent<EventArgs> _beforeDisconnectEvent = new AsyncEvent<EventArgs>();
-		protected event Func<EventArgs, Task> BeforeDisconnect
-		{
-			add
-			{
-				_beforeDisconnectEvent.AddHandler(value);
-			}
-			remove
-			{
-				_beforeDisconnectEvent.RemoveHandler(value);
-			}
-		}
-		private async Task OnBeforeDisconnect()
-		{
-			await _beforeDisconnectEvent.InvokeAsync(new EventArgs()).ConfigureAwait(false);
-		}
-
-		private readonly AsyncEvent<EventArgs> _connectedEvent = new AsyncEvent<EventArgs>();
+		private readonly AsyncEvent<EventArgs> _connectedEvent = new();
 		public event Func<EventArgs, Task> Connected
 		{
 			add
@@ -177,7 +160,24 @@ namespace Base10.SparkplugB.Core.Services
 			await _connectedEvent.InvokeAsync(arg).ConfigureAwait(false);
 		}
 
-		private readonly AsyncEvent<EventArgs> _disconnectedEvent = new AsyncEvent<EventArgs>();
+		private readonly AsyncEvent<EventArgs> _beforeDisconnectEvent = new();
+		public event Func<EventArgs, Task> BeforeDisconnect
+		{
+			add
+			{
+				_beforeDisconnectEvent.AddHandler(value);
+			}
+			remove
+			{
+				_beforeDisconnectEvent.RemoveHandler(value);
+			}
+		}
+		private async Task OnBeforeDisconnect()
+		{
+			await _beforeDisconnectEvent.InvokeAsync(new EventArgs()).ConfigureAwait(false);
+		}
+
+		private readonly AsyncEvent<EventArgs> _disconnectedEvent = new();
 		public event Func<EventArgs, Task> Disconnected
 		{
 			add
