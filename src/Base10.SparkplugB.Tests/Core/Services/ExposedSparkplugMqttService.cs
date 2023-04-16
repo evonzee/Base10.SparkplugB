@@ -35,6 +35,11 @@ namespace Base10.SparkplugB.Tests.Core.Services
 			return base.NextBirthSequence();
 		}
 
+		public new void ResetCommandSequence()
+		{
+			base.ResetCommandSequence();
+		}
+
 		internal new Task OnMessageReceived(MqttApplicationMessageReceivedEventArgs args)
 		{
 			return base.OnMessageReceived(args);

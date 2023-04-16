@@ -59,5 +59,24 @@ namespace Base10.SparkplugB.Tests.Core.Services
 			Task.WaitAll(tasks.ToArray());
 			app.CurrentBirthSequence().Should().Be(10000 % 256);
 		}
+
+		[Fact]
+		public void ResettingBirthSequenceWorks()
+		{
+			var app = new Mock<ExposedSparkplugMqttService>()
+			{
+				CallBase = true
+			}.Object;
+
+			ulong seq = app.NextCommandSequence();
+			seq.Should().Be(0);
+
+			app.NextCommandSequence();
+			app.NextCommandSequence();
+			app.NextCommandSequence();
+			app.ResetCommandSequence();
+			seq = app.NextCommandSequence();
+			seq.Should().Be(0);
+		}
 	}
 }
