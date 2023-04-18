@@ -24,7 +24,7 @@ Host.CreateDefaultBuilder()
 	{
 		services.Configure<SparkplugServiceOptions>(hostContext.Configuration.GetSection("SparkplugServiceOptions"));
 		services.AddHostedService<SparkplugLoggerService>();
-		services.AddTransient<SparkplugListener>();
+		services.AddTransient<SparkplugLoggerListener>();
 	})
 	.UseSerilog()
 	.Build()

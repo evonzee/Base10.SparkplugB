@@ -8,19 +8,12 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MQTTnet.Client;
 
-namespace Base10.SparkplugB.SparkplugLoggerApp
+namespace Base10.SparkplugB.ApplicationDemo
 {
-	public class SparkplugListener : SparkplugMqttService
+	public class SparkplugListener : SparkplugApplication
 	{
 		public SparkplugListener(IOptions<SparkplugServiceOptions> options, ILogger<SparkplugListener> logger) : base(options.Value, null, logger)
 		{
-			this.Connected += this.OnConnected;
-		}
-
-		private async Task OnConnected(EventArgs arg)
-		{
-			await this._mqttClient.SubscribeAsync("spBv1.0/#");
-			_logger?.LogInformation("Subscribed to all topics");
 		}
 	}
 }

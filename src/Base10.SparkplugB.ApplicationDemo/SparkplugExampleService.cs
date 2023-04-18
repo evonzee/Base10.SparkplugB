@@ -3,39 +3,40 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Base10.SparkplugB.Core.Events;
+using Base10.SparkplugB.Core.Services;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
-namespace Base10.SparkplugB.SparkplugLoggerApp
+namespace Base10.SparkplugB.ApplicationDemo
 {
-	public class SparkplugLoggerService : BackgroundService
+	public class SparkplugExampleService : BackgroundService
 	{
-		private readonly SparkplugLoggerListener _listener;
-		private readonly ILogger<SparkplugLoggerService> _logger;
+		private readonly ILogger<SparkplugExampleService> _logger;
+		private readonly SparkplugListener _app;
 
-		public SparkplugLoggerService(SparkplugLoggerListener listener, ILogger<SparkplugLoggerService> logger)
+		public SparkplugExampleService(SparkplugListener app, ILogger<SparkplugExampleService> logger)
 		{
-			_listener = listener;
 			_logger = logger;
+			_app = app;
 		}
 
 		protected override async Task ExecuteAsync(CancellationToken stoppingToken)
 		{
-			_listener.NodeBirthReceived += this.LogSparkplugEvent;
-			_listener.NodeDeathReceived += this.LogSparkplugEvent;
-			_listener.NodeDataReceived += this.LogSparkplugEvent;
-			_listener.NodeCommandReceived += this.LogSparkplugEvent;
-			_listener.DeviceBirthReceived += this.LogSparkplugEvent;
-			_listener.DeviceDeathReceived += this.LogSparkplugEvent;
-			_listener.DeviceDataReceived += this.LogSparkplugEvent;
-			_listener.DeviceCommandReceived += this.LogSparkplugEvent;
-			_listener.StateMessageReceived += this.LogStatusMessage;
-			_listener.InvalidMessageReceived += this.LogInvalidMessage;
+			_app.NodeBirthReceived += this.LogSparkplugEvent;
+			_app.NodeDeathReceived += this.LogSparkplugEvent;
+			_app.NodeDataReceived += this.LogSparkplugEvent;
+			_app.NodeCommandReceived += this.LogSparkplugEvent;
+			_app.DeviceBirthReceived += this.LogSparkplugEvent;
+			_app.DeviceDeathReceived += this.LogSparkplugEvent;
+			_app.DeviceDataReceived += this.LogSparkplugEvent;
+			_app.DeviceCommandReceived += this.LogSparkplugEvent;
+			_app.StateMessageReceived += this.LogStatusMessage;
+			_app.InvalidMessageReceived += this.LogInvalidMessage;
 
-			await _listener.Connect();
+			await _app.Connect();
 
 			await Task.Delay(-1, stoppingToken);
+			await _app.Disconnect();
 		}
 
 		private Task LogInvalidMessage(InvalidMessageReceivedEventEventArgs arg)
