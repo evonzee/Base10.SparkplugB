@@ -9,7 +9,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Base10.SparkplugB.ApplicationDemo
 {
-	public class SparkplugExampleService : BackgroundService
+	public class SparkplugExampleService : IHostedService
 	{
 		private readonly ILogger<SparkplugExampleService> _logger;
 		private readonly SparkplugListener _app;
@@ -20,7 +20,7 @@ namespace Base10.SparkplugB.ApplicationDemo
 			_app = app;
 		}
 
-		protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+		public async Task StartAsync(CancellationToken cancellationToken)
 		{
 			_app.NodeBirthReceived += this.LogSparkplugEvent;
 			_app.NodeDeathReceived += this.LogSparkplugEvent;
@@ -34,9 +34,13 @@ namespace Base10.SparkplugB.ApplicationDemo
 			_app.InvalidMessageReceived += this.LogInvalidMessage;
 
 			await _app.Connect();
+		}
 
-			await Task.Delay(-1, stoppingToken);
+		public async Task StopAsync(CancellationToken cancellationToken)
+		{
+			_logger.LogInformation("Stopping Sparkplug Example Service...");
 			await _app.Disconnect();
+			_logger.LogInformation("Service stopped.");
 		}
 
 		private Task LogInvalidMessage(InvalidMessageReceivedEventEventArgs arg)
