@@ -11,7 +11,7 @@ namespace Base10.SparkplugB.Tests.Core.Services
 	public class BasicApplicationTests
 	{
 		[Fact]
-		public async Task ApplicationCompliesWithStartupSpec()
+		public async Task ApplicationSubscribesToNonPromiscuousTopics()
 		{
 			var mqttClient = new Mock<IMqttClient>();
 			mqttClient
@@ -26,7 +26,7 @@ namespace Base10.SparkplugB.Tests.Core.Services
 				.Raises(m => m.ConnectedAsync += null, new object[] { new MqttClientConnectedEventArgs(new MqttClientConnectResult()) })
 				.Verifiable();
 
-			var app = new SparkplugApplication(new SparkplugServiceOptions()
+			var app = new SparkplugApplication(new SparkplugApplicationOptions()
 			{
 				Group = "SomeGroup",
 				NodeName = "SomeNode"
@@ -53,6 +53,49 @@ namespace Base10.SparkplugB.Tests.Core.Services
 		}
 
 		[Fact]
+		public async Task ApplicationSubscribesToPromiscuousTopics()
+		{
+			var mqttClient = new Mock<IMqttClient>();
+			mqttClient
+				.Setup<Task<MqttClientConnectResult>>(m => m.ConnectAsync(It.Is<MqttClientOptions>(
+					o => o.CleanSession == true
+					&& o.WillPayload.Length > 10 // don't check exactly, but check that it has some value
+					&& o.WillTopic == $"spBv1.0/STATE/SomeNode"
+					&& o.WillRetain
+					&& o.WillQualityOfServiceLevel == MqttQualityOfServiceLevel.AtLeastOnce
+				), It.IsAny<CancellationToken>()))
+				.Returns(Task.FromResult(new MqttClientConnectResult()))
+				.Raises(m => m.ConnectedAsync += null, new object[] { new MqttClientConnectedEventArgs(new MqttClientConnectResult()) })
+				.Verifiable();
+
+			var app = new SparkplugApplication(new SparkplugApplicationOptions()
+			{
+				Group = "SomeGroup",
+				NodeName = "SomeNode",
+				Promiscuous = true
+			}, mqttClient.Object);
+			await app.Connect();
+
+			mqttClient.Verify();
+			mqttClient.Verify(
+				m => m.SubscribeAsync(
+					It.Is<MqttClientSubscribeOptions>(
+						o => o.TopicFilters.Count(f => f.Topic.StartsWith("spBv1.0/#") && f.QualityOfServiceLevel == MqttQualityOfServiceLevel.AtMostOnce) == 1
+						&& o.TopicFilters.Count(f => f.Topic.StartsWith("spBv1.0/STATE") && f.QualityOfServiceLevel == MqttQualityOfServiceLevel.AtMostOnce) == 1
+						&& o.TopicFilters.Count == 2
+					),
+					It.IsAny<CancellationToken>()
+				));
+
+			mqttClient.Verify(
+					m => m.PublishAsync(It.Is<MqttApplicationMessage>(
+						m => m.Topic == "spBv1.0/STATE/SomeNode"
+						&& m.ConvertPayloadToString().Contains("true")
+				), It.IsAny<CancellationToken>())
+			);
+		}
+
+		[Fact]
 		public async Task GracefulDisconnectsSendDeath()
 		{
 			var mqttClient = new Mock<IMqttClient>();
@@ -64,7 +107,7 @@ namespace Base10.SparkplugB.Tests.Core.Services
 				.Verifiable();
 
 
-			var app = new SparkplugApplication(new SparkplugServiceOptions()
+			var app = new SparkplugApplication(new SparkplugApplicationOptions()
 			{
 				Group = "SomeGroup",
 				NodeName = "SomeNode"
@@ -93,7 +136,7 @@ namespace Base10.SparkplugB.Tests.Core.Services
 				.Verifiable();
 
 
-			var app = new SparkplugApplication(new SparkplugServiceOptions()
+			var app = new SparkplugApplication(new SparkplugApplicationOptions()
 			{
 				Group = "SomeGroup",
 				NodeName = "SomeNode"

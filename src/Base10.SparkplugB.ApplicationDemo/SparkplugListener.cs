@@ -12,7 +12,7 @@ namespace Base10.SparkplugB.ApplicationDemo
 {
 	public class SparkplugListener : SparkplugApplication
 	{
-		public SparkplugListener(IOptions<SparkplugServiceOptions> options, ILogger<SparkplugListener> logger) : base(options.Value, null, logger)
+		public SparkplugListener(IOptions<SparkplugApplicationOptions> options, ILogger<SparkplugListener> logger) : base(options.Value, null, logger)
 		{
 		}
 	}

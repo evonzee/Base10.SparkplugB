@@ -28,7 +28,7 @@ namespace Base10.SparkplugB.Tests.Core.Services
 				.Returns(Task.FromResult(new MqttClientPublishResult()));
 
 
-			var app = new SparkplugApplication(new SparkplugServiceOptions() { Group = "testgroup" }, mqttClient.Object);
+			var app = new SparkplugApplication(new SparkplugApplicationOptions() { Group = "testgroup" }, mqttClient.Object);
 
 			Payload payload = new()
 			{

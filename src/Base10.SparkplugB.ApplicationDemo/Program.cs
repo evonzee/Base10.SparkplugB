@@ -22,7 +22,7 @@ Host.CreateDefaultBuilder()
 	})
 	.ConfigureServices((hostContext, services) =>
 	{
-		services.Configure<SparkplugServiceOptions>(hostContext.Configuration.GetSection("SparkplugServiceOptions"));
+		services.Configure<SparkplugApplicationOptions>(hostContext.Configuration.GetSection("SparkplugServiceOptions"));
 		services.AddHostedService<SparkplugExampleService>();
 		services.AddTransient<SparkplugListener>();
 	})

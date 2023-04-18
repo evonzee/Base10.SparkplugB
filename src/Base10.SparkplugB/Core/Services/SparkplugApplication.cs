@@ -13,9 +13,11 @@ namespace Base10.SparkplugB.Core.Services
 	public class SparkplugApplication : SparkplugMqttService
 	{
 		private long _connectTimestamp = 0;
+		private readonly SparkplugApplicationOptions _options;
 
-		public SparkplugApplication(SparkplugServiceOptions options, IMqttClient? mqttClient = null, ILogger? logger = null) : base(options, mqttClient, logger)
+		public SparkplugApplication(SparkplugApplicationOptions options, IMqttClient? mqttClient = null, ILogger? logger = null) : base(options, mqttClient, logger)
 		{
+			_options = options;
 			this.Connected += OnConnected;
 			this.BeforeDisconnect += OnBeforeDisconnect;
 		}
@@ -59,15 +61,23 @@ namespace Base10.SparkplugB.Core.Services
 
 		private async Task SubscribeInitial(IMqttClient mqttClient)
 		{
-			var options = new MqttClientSubscribeOptionsBuilder()
-				.WithTopicFilter(CommandType.STATE.GetSubscriptionPattern(), MQTTnet.Protocol.MqttQualityOfServiceLevel.AtMostOnce)
-				.WithTopicFilter(CommandType.NBIRTH.GetSubscriptionPattern(_group), MQTTnet.Protocol.MqttQualityOfServiceLevel.AtMostOnce)
-				.WithTopicFilter(CommandType.NDEATH.GetSubscriptionPattern(_group), MQTTnet.Protocol.MqttQualityOfServiceLevel.AtMostOnce)
-				.WithTopicFilter(CommandType.NDATA.GetSubscriptionPattern(_group), MQTTnet.Protocol.MqttQualityOfServiceLevel.AtMostOnce)
-				.WithTopicFilter(CommandType.DBIRTH.GetSubscriptionPattern(_group), MQTTnet.Protocol.MqttQualityOfServiceLevel.AtMostOnce)
-				.WithTopicFilter(CommandType.DDEATH.GetSubscriptionPattern(_group), MQTTnet.Protocol.MqttQualityOfServiceLevel.AtMostOnce)
-				.WithTopicFilter(CommandType.DDATA.GetSubscriptionPattern(_group), MQTTnet.Protocol.MqttQualityOfServiceLevel.AtMostOnce)
-				.Build();
+			var optionsBuilder = new MqttClientSubscribeOptionsBuilder()
+				.WithTopicFilter(CommandType.STATE.GetSubscriptionPattern(), MQTTnet.Protocol.MqttQualityOfServiceLevel.AtMostOnce);
+			if (_options.Promiscuous)
+			{
+				optionsBuilder = optionsBuilder.WithTopicFilter("spBv1.0/#");
+			}
+			else
+			{
+				optionsBuilder = optionsBuilder.WithTopicFilter(CommandType.NBIRTH.GetSubscriptionPattern(_group), MQTTnet.Protocol.MqttQualityOfServiceLevel.AtMostOnce)
+					.WithTopicFilter(CommandType.NDEATH.GetSubscriptionPattern(_group), MQTTnet.Protocol.MqttQualityOfServiceLevel.AtMostOnce)
+					.WithTopicFilter(CommandType.NDATA.GetSubscriptionPattern(_group), MQTTnet.Protocol.MqttQualityOfServiceLevel.AtMostOnce)
+					.WithTopicFilter(CommandType.DBIRTH.GetSubscriptionPattern(_group), MQTTnet.Protocol.MqttQualityOfServiceLevel.AtMostOnce)
+					.WithTopicFilter(CommandType.DDEATH.GetSubscriptionPattern(_group), MQTTnet.Protocol.MqttQualityOfServiceLevel.AtMostOnce)
+					.WithTopicFilter(CommandType.DDATA.GetSubscriptionPattern(_group), MQTTnet.Protocol.MqttQualityOfServiceLevel.AtMostOnce);
+			}
+
+			var options = optionsBuilder.Build();
 			await mqttClient.SubscribeAsync(options);
 		}
 
