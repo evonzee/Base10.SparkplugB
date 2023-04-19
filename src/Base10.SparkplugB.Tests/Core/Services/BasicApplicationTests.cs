@@ -31,7 +31,7 @@ namespace Base10.SparkplugB.Tests.Core.Services
 				Group = "SomeGroup",
 				NodeName = "SomeNode"
 			}, mqttClient.Object);
-			await app.Connect();
+			await app.ConnectAsync();
 
 			mqttClient.Verify();
 			mqttClient.Verify(
@@ -74,7 +74,7 @@ namespace Base10.SparkplugB.Tests.Core.Services
 				NodeName = "SomeNode",
 				Promiscuous = true
 			}, mqttClient.Object);
-			await app.Connect();
+			await app.ConnectAsync();
 
 			mqttClient.Verify();
 			mqttClient.Verify(
@@ -112,8 +112,8 @@ namespace Base10.SparkplugB.Tests.Core.Services
 				Group = "SomeGroup",
 				NodeName = "SomeNode"
 			}, mqttClient.Object);
-			await app.Connect();
-			await app.Disconnect();
+			await app.ConnectAsync();
+			await app.DisconnectAsync();
 
 			mqttClient.Verify();
 			mqttClient.Verify(
@@ -141,7 +141,7 @@ namespace Base10.SparkplugB.Tests.Core.Services
 				Group = "SomeGroup",
 				NodeName = "SomeNode"
 			}, mqttClient.Object);
-			await app.Connect();
+			await app.ConnectAsync();
 
 			mqttClient.Raise(m => m.DisconnectedAsync += null, new object[] { new MqttClientDisconnectedEventArgs() });
 

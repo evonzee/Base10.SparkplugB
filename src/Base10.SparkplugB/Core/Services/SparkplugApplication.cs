@@ -18,20 +18,20 @@ namespace Base10.SparkplugB.Core.Services
 		public SparkplugApplication(SparkplugApplicationOptions options, IMqttClient? mqttClient = null, ILogger? logger = null) : base(options, mqttClient, logger)
 		{
 			_options = options;
-			this.Connected += OnConnected;
-			this.BeforeDisconnect += OnBeforeDisconnect;
+			this.ConnectedAsync += OnConnectedAsync;
+			this.BeforeDisconnectAsync += OnBeforeDisconnectAsync;
 		}
 
-		private async Task OnConnected(EventArgs e)
+		private async Task OnConnectedAsync(EventArgs e)
 		{
 			try
 			{
 				// subscribe to appropriate topics per configuration
 				// subscribe happens before birth, per [tck-id-host-topic-phid-birth-required]
-				await SubscribeInitial(_mqttClient);
+				await SubscribeInitialAsync(_mqttClient);
 
 				// send birth message
-				await SendBirthSequence(_mqttClient); // apps must satisfy [tck-id-components-ph-state]
+				await SendBirthSequenceAsync(_mqttClient); // apps must satisfy [tck-id-components-ph-state]
 			}
 			catch (Exception ex)
 			{
@@ -40,9 +40,9 @@ namespace Base10.SparkplugB.Core.Services
 			}
 		}
 
-		protected async Task OnBeforeDisconnect(EventArgs e)
+		protected async Task OnBeforeDisconnectAsync(EventArgs e)
 		{
-			await SendDeathSequence(_mqttClient);
+			await SendDeathSequenceAsync(_mqttClient);
 		}
 
 		protected override MqttClientOptionsBuilder ConfigureLastWill(MqttClientOptionsBuilder builder)
@@ -59,7 +59,7 @@ namespace Base10.SparkplugB.Core.Services
 				;
 		}
 
-		private async Task SubscribeInitial(IMqttClient mqttClient)
+		private async Task SubscribeInitialAsync(IMqttClient mqttClient)
 		{
 			var optionsBuilder = new MqttClientSubscribeOptionsBuilder()
 				.WithTopicFilter(CommandType.STATE.GetSubscriptionPattern(), MQTTnet.Protocol.MqttQualityOfServiceLevel.AtMostOnce);
@@ -81,17 +81,17 @@ namespace Base10.SparkplugB.Core.Services
 			await mqttClient.SubscribeAsync(options);
 		}
 
-		private async Task SendBirthSequence(IMqttClient mqttClient)
+		private async Task SendBirthSequenceAsync(IMqttClient mqttClient)
 		{
-			await SendStatus(mqttClient, true);
+			await SendStatusAsync(mqttClient, true);
 		}
 
-		private async Task SendDeathSequence(IMqttClient mqttClient)
+		private async Task SendDeathSequenceAsync(IMqttClient mqttClient)
 		{
-			await SendStatus(mqttClient, false);
+			await SendStatusAsync(mqttClient, false);
 		}
 
-		private async Task SendStatus(IMqttClient mqttClient, bool state)
+		private async Task SendStatusAsync(IMqttClient mqttClient, bool state)
 		{
 			var payload = new { online = state, timestamp = _connectTimestamp };
 			await mqttClient.PublishAsync(new MQTTnet.MqttApplicationMessageBuilder()
@@ -102,7 +102,7 @@ namespace Base10.SparkplugB.Core.Services
 				.Build());
 		}
 
-		public async Task SendNodeCommand(string node, Payload payload)
+		public async Task SendNodeCommandAsync(string node, Payload payload)
 		{
 			payload = PreparePayloadForTransmission(payload);
 			await _mqttClient.PublishAsync(new MQTTnet.MqttApplicationMessageBuilder()
@@ -112,7 +112,7 @@ namespace Base10.SparkplugB.Core.Services
 				.Build());
 		}
 
-		public async Task SendDeviceCommand(string node, string device, Payload payload)
+		public async Task SendDeviceCommandAsync(string node, string device, Payload payload)
 		{
 			payload = PreparePayloadForTransmission(payload);
 			await _mqttClient.PublishAsync(new MQTTnet.MqttApplicationMessageBuilder()

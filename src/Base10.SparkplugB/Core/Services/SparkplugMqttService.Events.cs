@@ -14,21 +14,21 @@ namespace Base10.SparkplugB.Core.Services
 		private readonly SparkplugMessageParser _messageParser = new();
 
 		// receive messages from MQTT and catch exceptions to raise an invalid event
-		protected async Task OnMessageReceived(MqttApplicationMessageReceivedEventArgs arg)
+		protected virtual async Task OnMessageReceivedAsync(MqttApplicationMessageReceivedEventArgs arg)
 		{
 			try
 			{
-				await OnMessageReceivedInternal(arg).ConfigureAwait(false);
+				await OnMessageReceivedAsyncInternal(arg).ConfigureAwait(false);
 			}
 			catch (Exception ex)
 			{
 				_logger?.LogError(ex, "Error processing message");
 				var invalidArgs = new InvalidMessageReceivedEventEventArgs(arg.ApplicationMessage.Topic.ToString(), arg.ApplicationMessage.Payload);
-				await this.OnInvalidMessageReceived(invalidArgs).ConfigureAwait(false);
+				await this.OnInvalidMessageReceivedAsync(invalidArgs).ConfigureAwait(false);
 			}
 		}
 
-		private async Task OnMessageReceivedInternal(MqttApplicationMessageReceivedEventArgs arg)
+		private async Task OnMessageReceivedAsyncInternal(MqttApplicationMessageReceivedEventArgs arg)
 		{
 			arg.AutoAcknowledge = true;
 			var topic = _topicParser.Parse(arg.ApplicationMessage.Topic);
@@ -36,74 +36,74 @@ namespace Base10.SparkplugB.Core.Services
 			{
 				case Enums.CommandType.STATE:
 					var state = _messageParser.ParseState(arg.ApplicationMessage.Payload);
-					await FireEvent(arg, state, async (s) =>
+					await FireEventAsync(arg, state, async (s) =>
 					{
 						var args = new NodeStateEventArgs(topic, s);
-						await OnStateMessageReceived(args).ConfigureAwait(false);
+						await OnStateMessageReceivedAsync(args).ConfigureAwait(false);
 					}).ConfigureAwait(false);
 					break;
 				case Enums.CommandType.NBIRTH:
 					var payload = _messageParser.ParseSparkplug(arg.ApplicationMessage.Payload);
-					await FireEvent(arg, payload, async (p) =>
+					await FireEventAsync(arg, payload, async (p) =>
 					{
 						var args = new SparkplugEventArgs(topic, p);
-						await OnNodeBirthReceived(args).ConfigureAwait(false);
+						await OnNodeBirthReceivedAsync(args).ConfigureAwait(false);
 					}).ConfigureAwait(false);
 					break;
 				case Enums.CommandType.NDATA:
 					payload = _messageParser.ParseSparkplug(arg.ApplicationMessage.Payload);
-					await FireEvent(arg, payload, async (p) =>
+					await FireEventAsync(arg, payload, async (p) =>
 					{
 						var args = new SparkplugEventArgs(topic, p);
-						await OnNodeDataReceived(args).ConfigureAwait(false);
+						await OnNodeDataReceivedAsync(args).ConfigureAwait(false);
 					}).ConfigureAwait(false);
 					break;
 				case Enums.CommandType.NDEATH:
 					payload = _messageParser.ParseSparkplug(arg.ApplicationMessage.Payload);
-					await FireEvent(arg, payload, async (p) =>
+					await FireEventAsync(arg, payload, async (p) =>
 					{
 						var args = new SparkplugEventArgs(topic, p);
-						await OnNodeDeathReceived(args).ConfigureAwait(false);
+						await OnNodeDeathReceivedAsync(args).ConfigureAwait(false);
 					}).ConfigureAwait(false);
 					break;
 				case Enums.CommandType.NCMD:
 					payload = _messageParser.ParseSparkplug(arg.ApplicationMessage.Payload);
-					await FireEvent(arg, payload, async (p) =>
+					await FireEventAsync(arg, payload, async (p) =>
 					{
 						var args = new SparkplugEventArgs(topic, p);
-						await OnNodeCommandReceived(args).ConfigureAwait(false);
+						await OnNodeCommandReceivedAsync(args).ConfigureAwait(false);
 					}).ConfigureAwait(false);
 					break;
 				case Enums.CommandType.DBIRTH:
 					payload = _messageParser.ParseSparkplug(arg.ApplicationMessage.Payload);
-					await FireEvent(arg, payload, async (p) =>
+					await FireEventAsync(arg, payload, async (p) =>
 					{
 						var args = new SparkplugEventArgs(topic, p);
-						await OnDeviceBirthReceived(args).ConfigureAwait(false);
+						await OnDeviceBirthReceivedAsync(args).ConfigureAwait(false);
 					}).ConfigureAwait(false);
 					break;
 				case Enums.CommandType.DDATA:
 					payload = _messageParser.ParseSparkplug(arg.ApplicationMessage.Payload);
-					await FireEvent(arg, payload, async (p) =>
+					await FireEventAsync(arg, payload, async (p) =>
 					{
 						var args = new SparkplugEventArgs(topic, p);
-						await OnDeviceDataReceived(args).ConfigureAwait(false);
+						await OnDeviceDataReceivedAsync(args).ConfigureAwait(false);
 					}).ConfigureAwait(false);
 					break;
 				case Enums.CommandType.DDEATH:
 					payload = _messageParser.ParseSparkplug(arg.ApplicationMessage.Payload);
-					await FireEvent(arg, payload, async (p) =>
+					await FireEventAsync(arg, payload, async (p) =>
 					{
 						var args = new SparkplugEventArgs(topic, p);
-						await OnDeviceDeathReceived(args).ConfigureAwait(false);
+						await OnDeviceDeathReceivedAsync(args).ConfigureAwait(false);
 					}).ConfigureAwait(false);
 					break;
 				case Enums.CommandType.DCMD:
 					payload = _messageParser.ParseSparkplug(arg.ApplicationMessage.Payload);
-					await FireEvent(arg, payload, async (p) =>
+					await FireEventAsync(arg, payload, async (p) =>
 					{
 						var args = new SparkplugEventArgs(topic, p);
-						await OnDeviceCommandReceived(args).ConfigureAwait(false);
+						await OnDeviceCommandReceivedAsync(args).ConfigureAwait(false);
 					}).ConfigureAwait(false);
 					break;
 				default:
@@ -112,7 +112,7 @@ namespace Base10.SparkplugB.Core.Services
 		}
 
 		// function to fire the actual event unless the payload is null, in which case fire invalid
-		private async Task FireEvent<T>(MqttApplicationMessageReceivedEventArgs arg, T? state, Func<T, Task> handler)
+		private async Task FireEventAsync<T>(MqttApplicationMessageReceivedEventArgs arg, T? state, Func<T, Task> handler)
 		{
 			if (state != null)
 			{
@@ -121,13 +121,13 @@ namespace Base10.SparkplugB.Core.Services
 			else
 			{
 				var invalidArgs = new InvalidMessageReceivedEventEventArgs(arg.ApplicationMessage.Topic.ToString(), arg.ApplicationMessage.Payload);
-				await this.OnInvalidMessageReceived(invalidArgs).ConfigureAwait(false);
+				await this.OnInvalidMessageReceivedAsync(invalidArgs).ConfigureAwait(false);
 			}
 		}
 
 		// Invalid message
 		private readonly AsyncEvent<InvalidMessageReceivedEventEventArgs> _invalidMessageReceivedEvent = new();
-		public event Func<InvalidMessageReceivedEventEventArgs, Task> InvalidMessageReceived
+		public event Func<InvalidMessageReceivedEventEventArgs, Task> InvalidMessageReceivedAsync
 		{
 			add
 			{
@@ -138,14 +138,14 @@ namespace Base10.SparkplugB.Core.Services
 				_invalidMessageReceivedEvent.RemoveHandler(value);
 			}
 		}
-		protected virtual async Task OnInvalidMessageReceived(InvalidMessageReceivedEventEventArgs args)
+		protected virtual async Task OnInvalidMessageReceivedAsync(InvalidMessageReceivedEventEventArgs args)
 		{
 			await _invalidMessageReceivedEvent.InvokeAsync(args).ConfigureAwait(false);
 		}
 
 		//  Node State
 		private readonly AsyncEvent<NodeStateEventArgs> _stateMessageReceivedEvent = new();
-		public event Func<NodeStateEventArgs, Task> StateMessageReceived
+		public event Func<NodeStateEventArgs, Task> StateMessageReceivedAsync
 		{
 			add
 			{
@@ -156,14 +156,14 @@ namespace Base10.SparkplugB.Core.Services
 				_stateMessageReceivedEvent.RemoveHandler(value);
 			}
 		}
-		protected virtual async Task OnStateMessageReceived(NodeStateEventArgs args)
+		protected virtual async Task OnStateMessageReceivedAsync(NodeStateEventArgs args)
 		{
 			await _stateMessageReceivedEvent.InvokeAsync(args).ConfigureAwait(false);
 		}
 
 		// Node Birth
 		private readonly AsyncEvent<SparkplugEventArgs> _nodeBirthReceivedEvent = new();
-		public event Func<SparkplugEventArgs, Task> NodeBirthReceived
+		public event Func<SparkplugEventArgs, Task> NodeBirthReceivedAsync
 		{
 			add
 			{
@@ -174,14 +174,14 @@ namespace Base10.SparkplugB.Core.Services
 				_nodeBirthReceivedEvent.RemoveHandler(value);
 			}
 		}
-		protected virtual async Task OnNodeBirthReceived(SparkplugEventArgs args)
+		protected virtual async Task OnNodeBirthReceivedAsync(SparkplugEventArgs args)
 		{
 			await _nodeBirthReceivedEvent.InvokeAsync(args).ConfigureAwait(false);
 		}
 
 		// Node Data
 		private readonly AsyncEvent<SparkplugEventArgs> _nodeDataReceivedEvent = new();
-		public event Func<SparkplugEventArgs, Task> NodeDataReceived
+		public event Func<SparkplugEventArgs, Task> NodeDataReceivedAsync
 		{
 			add
 			{
@@ -192,14 +192,14 @@ namespace Base10.SparkplugB.Core.Services
 				_nodeDataReceivedEvent.RemoveHandler(value);
 			}
 		}
-		protected virtual async Task OnNodeDataReceived(SparkplugEventArgs args)
+		protected virtual async Task OnNodeDataReceivedAsync(SparkplugEventArgs args)
 		{
 			await _nodeDataReceivedEvent.InvokeAsync(args).ConfigureAwait(false);
 		}
 
 		//Node Death
 		private readonly AsyncEvent<SparkplugEventArgs> _nodeDeathReceivedEvent = new();
-		public event Func<SparkplugEventArgs, Task> NodeDeathReceived
+		public event Func<SparkplugEventArgs, Task> NodeDeathReceivedAsync
 		{
 			add
 			{
@@ -210,14 +210,14 @@ namespace Base10.SparkplugB.Core.Services
 				_nodeDeathReceivedEvent.RemoveHandler(value);
 			}
 		}
-		protected virtual async Task OnNodeDeathReceived(SparkplugEventArgs args)
+		protected virtual async Task OnNodeDeathReceivedAsync(SparkplugEventArgs args)
 		{
 			await _nodeDeathReceivedEvent.InvokeAsync(args).ConfigureAwait(false);
 		}
 
 		// Node Command
 		private readonly AsyncEvent<SparkplugEventArgs> _nodeCommandReceivedEvent = new();
-		public event Func<SparkplugEventArgs, Task> NodeCommandReceived
+		public event Func<SparkplugEventArgs, Task> NodeCommandReceivedAsync
 		{
 			add
 			{
@@ -228,14 +228,14 @@ namespace Base10.SparkplugB.Core.Services
 				_nodeCommandReceivedEvent.RemoveHandler(value);
 			}
 		}
-		protected virtual async Task OnNodeCommandReceived(SparkplugEventArgs args)
+		protected virtual async Task OnNodeCommandReceivedAsync(SparkplugEventArgs args)
 		{
 			await _nodeCommandReceivedEvent.InvokeAsync(args).ConfigureAwait(false);
 		}
 
 		// Device Birth
 		private readonly AsyncEvent<SparkplugEventArgs> _deviceBirthReceivedEvent = new();
-		public event Func<SparkplugEventArgs, Task> DeviceBirthReceived
+		public event Func<SparkplugEventArgs, Task> DeviceBirthReceivedAsync
 		{
 			add
 			{
@@ -246,14 +246,14 @@ namespace Base10.SparkplugB.Core.Services
 				_deviceBirthReceivedEvent.RemoveHandler(value);
 			}
 		}
-		protected virtual async Task OnDeviceBirthReceived(SparkplugEventArgs args)
+		protected virtual async Task OnDeviceBirthReceivedAsync(SparkplugEventArgs args)
 		{
 			await _deviceBirthReceivedEvent.InvokeAsync(args).ConfigureAwait(false);
 		}
 
 		// Device Data
 		private readonly AsyncEvent<SparkplugEventArgs> _deviceDataReceivedEvent = new();
-		public event Func<SparkplugEventArgs, Task> DeviceDataReceived
+		public event Func<SparkplugEventArgs, Task> DeviceDataReceivedAsync
 		{
 			add
 			{
@@ -264,14 +264,14 @@ namespace Base10.SparkplugB.Core.Services
 				_deviceDataReceivedEvent.RemoveHandler(value);
 			}
 		}
-		protected virtual async Task OnDeviceDataReceived(SparkplugEventArgs args)
+		protected virtual async Task OnDeviceDataReceivedAsync(SparkplugEventArgs args)
 		{
 			await _deviceDataReceivedEvent.InvokeAsync(args).ConfigureAwait(false);
 		}
 
 		// Device Death
 		private readonly AsyncEvent<SparkplugEventArgs> _deviceDeathReceivedEvent = new();
-		public event Func<SparkplugEventArgs, Task> DeviceDeathReceived
+		public event Func<SparkplugEventArgs, Task> DeviceDeathReceivedAsync
 		{
 			add
 			{
@@ -282,14 +282,14 @@ namespace Base10.SparkplugB.Core.Services
 				_deviceDeathReceivedEvent.RemoveHandler(value);
 			}
 		}
-		protected virtual async Task OnDeviceDeathReceived(SparkplugEventArgs args)
+		protected virtual async Task OnDeviceDeathReceivedAsync(SparkplugEventArgs args)
 		{
 			await _deviceDeathReceivedEvent.InvokeAsync(args).ConfigureAwait(false);
 		}
 
 		// Device Command
 		private readonly AsyncEvent<SparkplugEventArgs> _deviceCommandReceivedEvent = new();
-		public event Func<SparkplugEventArgs, Task> DeviceCommandReceived
+		public event Func<SparkplugEventArgs, Task> DeviceCommandReceivedAsync
 		{
 			add
 			{
@@ -300,7 +300,7 @@ namespace Base10.SparkplugB.Core.Services
 				_deviceCommandReceivedEvent.RemoveHandler(value);
 			}
 		}
-		protected virtual async Task OnDeviceCommandReceived(SparkplugEventArgs args)
+		protected virtual async Task OnDeviceCommandReceivedAsync(SparkplugEventArgs args)
 		{
 			await _deviceCommandReceivedEvent.InvokeAsync(args).ConfigureAwait(false);
 		}

@@ -14,7 +14,7 @@ namespace Base10.SparkplugB.SparkplugLoggerApp
 	{
 		public SparkplugLoggerListener(IOptions<SparkplugServiceOptions> options, ILogger<SparkplugLoggerListener> logger) : base(options.Value, null, logger)
 		{
-			this.Connected += this.OnConnected;
+			this.ConnectedAsync += this.OnConnected;
 		}
 
 		private async Task OnConnected(EventArgs arg)

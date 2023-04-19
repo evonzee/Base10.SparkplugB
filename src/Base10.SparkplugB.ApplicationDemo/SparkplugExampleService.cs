@@ -22,24 +22,24 @@ namespace Base10.SparkplugB.ApplicationDemo
 
 		public async Task StartAsync(CancellationToken cancellationToken)
 		{
-			_app.NodeBirthReceived += this.LogSparkplugEvent;
-			_app.NodeDeathReceived += this.LogSparkplugEvent;
-			_app.NodeDataReceived += this.LogSparkplugEvent;
-			_app.NodeCommandReceived += this.LogSparkplugEvent;
-			_app.DeviceBirthReceived += this.LogSparkplugEvent;
-			_app.DeviceDeathReceived += this.LogSparkplugEvent;
-			_app.DeviceDataReceived += this.LogSparkplugEvent;
-			_app.DeviceCommandReceived += this.LogSparkplugEvent;
-			_app.StateMessageReceived += this.LogStatusMessage;
-			_app.InvalidMessageReceived += this.LogInvalidMessage;
+			_app.NodeBirthReceivedAsync += this.LogSparkplugEvent;
+			_app.NodeDeathReceivedAsync += this.LogSparkplugEvent;
+			_app.NodeDataReceivedAsync += this.LogSparkplugEvent;
+			_app.NodeCommandReceivedAsync += this.LogSparkplugEvent;
+			_app.DeviceBirthReceivedAsync += this.LogSparkplugEvent;
+			_app.DeviceDeathReceivedAsync += this.LogSparkplugEvent;
+			_app.DeviceDataReceivedAsync += this.LogSparkplugEvent;
+			_app.DeviceCommandReceivedAsync += this.LogSparkplugEvent;
+			_app.StateMessageReceivedAsync += this.LogStatusMessage;
+			_app.InvalidMessageReceivedAsync += this.LogInvalidMessage;
 
-			await _app.Connect();
+			await _app.ConnectAsync();
 		}
 
 		public async Task StopAsync(CancellationToken cancellationToken)
 		{
 			_logger.LogInformation("Stopping Sparkplug Example Service...");
-			await _app.Disconnect();
+			await _app.DisconnectAsync();
 			_logger.LogInformation("Service stopped.");
 		}
 

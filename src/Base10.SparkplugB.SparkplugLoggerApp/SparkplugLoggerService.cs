@@ -22,18 +22,18 @@ namespace Base10.SparkplugB.SparkplugLoggerApp
 
 		protected override async Task ExecuteAsync(CancellationToken stoppingToken)
 		{
-			_listener.NodeBirthReceived += this.LogSparkplugEvent;
-			_listener.NodeDeathReceived += this.LogSparkplugEvent;
-			_listener.NodeDataReceived += this.LogSparkplugEvent;
-			_listener.NodeCommandReceived += this.LogSparkplugEvent;
-			_listener.DeviceBirthReceived += this.LogSparkplugEvent;
-			_listener.DeviceDeathReceived += this.LogSparkplugEvent;
-			_listener.DeviceDataReceived += this.LogSparkplugEvent;
-			_listener.DeviceCommandReceived += this.LogSparkplugEvent;
-			_listener.StateMessageReceived += this.LogStatusMessage;
-			_listener.InvalidMessageReceived += this.LogInvalidMessage;
+			_listener.NodeBirthReceivedAsync += this.LogSparkplugEvent;
+			_listener.NodeDeathReceivedAsync += this.LogSparkplugEvent;
+			_listener.NodeDataReceivedAsync += this.LogSparkplugEvent;
+			_listener.NodeCommandReceivedAsync += this.LogSparkplugEvent;
+			_listener.DeviceBirthReceivedAsync += this.LogSparkplugEvent;
+			_listener.DeviceDeathReceivedAsync += this.LogSparkplugEvent;
+			_listener.DeviceDataReceivedAsync += this.LogSparkplugEvent;
+			_listener.DeviceCommandReceivedAsync += this.LogSparkplugEvent;
+			_listener.StateMessageReceivedAsync += this.LogStatusMessage;
+			_listener.InvalidMessageReceivedAsync += this.LogInvalidMessage;
 
-			await _listener.Connect();
+			await _listener.ConnectAsync();
 
 			await Task.Delay(-1, stoppingToken);
 		}

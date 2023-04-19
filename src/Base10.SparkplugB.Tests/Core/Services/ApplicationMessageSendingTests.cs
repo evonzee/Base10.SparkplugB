@@ -35,7 +35,7 @@ namespace Base10.SparkplugB.Tests.Core.Services
 				Seq = 0,
 			};
 			payload.Metrics.AddRange(metrics);
-			await app.SendDeviceCommand("node", "device", payload);
+			await app.SendDeviceCommandAsync("node", "device", payload);
 
 			message.Should().NotBeNull();
 			var p = Payload.Parser.ParseFrom(message?.Payload);
@@ -47,13 +47,13 @@ namespace Base10.SparkplugB.Tests.Core.Services
 			var lastSequence = payload.Seq;
 			var lastTimestamp = p.Timestamp;
 			Thread.Sleep(5); // make sure some time elapses so timestamp is different
-			await app.SendDeviceCommand("node", "device", payload);
+			await app.SendDeviceCommandAsync("node", "device", payload);
 			payload.Seq.Should().Be(lastSequence + 1);
 			payload.Timestamp.Should().BeGreaterThan(lastTimestamp);
 			p.Metrics.Count.Should().Be(metrics.Count);
 
 			// send it again as a node metric
-			await app.SendNodeCommand("node", payload);
+			await app.SendNodeCommandAsync("node", payload);
 			payload.Seq.Should().Be(lastSequence + 2);
 			p.Metrics.Count.Should().Be(metrics.Count);
 			message?.Topic.Should().Be("spBv1.0/testgroup/NCMD/node");

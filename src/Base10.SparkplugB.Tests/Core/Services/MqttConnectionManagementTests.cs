@@ -24,8 +24,8 @@ namespace Base10.SparkplugB.Tests.Core.Services
 
 			var connects = 0;
 			var app = new ExposedSparkplugMqttService(mqttClient.Object);
-			app.Connected += (e) => { ++connects; return Task.CompletedTask; };
-			app.Connect().Wait();
+			app.ConnectedAsync += (e) => { ++connects; return Task.CompletedTask; };
+			app.ConnectAsync().Wait();
 
 			mqttClient.Verify();
 			connects.Should().Be(1);
@@ -42,7 +42,7 @@ namespace Base10.SparkplugB.Tests.Core.Services
 
 			var app = new ExposedSparkplugMqttService(mqttClient.Object);
 
-			app.Connect().Wait();
+			app.ConnectAsync().Wait();
 
 			mqttClient.Raise(m => m.DisconnectedAsync += null, new object[] { new MqttClientDisconnectedEventArgs() });
 
@@ -67,8 +67,8 @@ namespace Base10.SparkplugB.Tests.Core.Services
 
 			var app = new ExposedSparkplugMqttService(mqttClient.Object);
 
-			app.Connect().Wait();
-			app.Disconnect().Wait();
+			app.ConnectAsync().Wait();
+			app.DisconnectAsync().Wait();
 
 			mqttClient.Verify(m => m.ConnectAsync(It.IsAny<MqttClientOptions>(), It.IsAny<CancellationToken>()), Times.Exactly(1));
 			mqttClient.Verify();

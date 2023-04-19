@@ -106,33 +106,33 @@ namespace Base10.SparkplugB.Tests.Core.Services
 				{"BeforeDisconnect", (args) => { status.Add("BeforeDisconnect", true); return Task.CompletedTask;}},
 				{"Disconnected", (args) => { status.Add("Disconnected", true); return Task.CompletedTask;}},
 			};
-			app.BeforeStart += handlers["BeforeStart"];
-			app.Started += handlers["Started"];
-			app.Connected += handlers["Connected"];
-			app.BeforeDisconnect += handlers["BeforeDisconnect"];
-			app.Disconnected += handlers["Disconnected"];
+			app.BeforeStartAsync += handlers["BeforeStart"];
+			app.StartedAsync += handlers["Started"];
+			app.ConnectedAsync += handlers["Connected"];
+			app.BeforeDisconnectAsync += handlers["BeforeDisconnect"];
+			app.DisconnectedAsync += handlers["Disconnected"];
 
-			await app.Connect();
+			await app.ConnectAsync();
 			status.Should().Contain("BeforeStart", true);
 			status.Should().Contain("Started", true);
 			status.Should().Contain("Connected", true);
 			status.Should().NotContainKey("BeforeDisconnect");
 			status.Should().NotContainKey("Disconnected");
 
-			await app.Disconnect();
+			await app.DisconnectAsync();
 			status.Should().Contain("BeforeDisconnect", true);
 			status.Should().Contain("Disconnected", true);
 
 			// confirm that we can remove all the handlers
-			app.BeforeStart -= handlers["BeforeStart"];
-			app.Started -= handlers["Started"];
-			app.Connected -= handlers["Connected"];
-			app.BeforeDisconnect -= handlers["BeforeDisconnect"];
-			app.Disconnected -= handlers["Disconnected"];
+			app.BeforeStartAsync -= handlers["BeforeStart"];
+			app.StartedAsync -= handlers["Started"];
+			app.ConnectedAsync -= handlers["Connected"];
+			app.BeforeDisconnectAsync -= handlers["BeforeDisconnect"];
+			app.DisconnectedAsync -= handlers["Disconnected"];
 
 			status.Clear();
-			await app.Connect();
-			await app.Disconnect();
+			await app.ConnectAsync();
+			await app.DisconnectAsync();
 			status.Should().BeEmpty();
 		}
 	}

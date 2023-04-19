@@ -39,29 +39,29 @@ namespace Base10.SparkplugB.Core.Services
 			_logger = logger;
 
 			// add handlers
-			_mqttClient.ConnectedAsync += OnConnected;
-			_mqttClient.DisconnectedAsync += OnDisconnected;
-			_mqttClient.ApplicationMessageReceivedAsync += OnMessageReceived;
+			_mqttClient.ConnectedAsync += OnConnectedAsync;
+			_mqttClient.DisconnectedAsync += OnDisconnectedAsync;
+			_mqttClient.ApplicationMessageReceivedAsync += OnMessageReceivedAsync;
 		}
 
-		public async Task Connect()
+		public async Task ConnectAsync()
 		{
 			this.NextBirthSequence(); // tie this to connect only and not birth due to [tck-id-payloads-nbirth-bdseq-repeat].  Could move into Edge node ConfigureLastWill implementation?
 			var options = ConfigureLastWill(_mqttOptionsBuilder).Build();
 
 			_shouldReconnect = true;
 
-			await this.OnBeforeStart().ConfigureAwait(false);
+			await this.OnBeforeStartAsync().ConfigureAwait(false);
 			await _mqttClient.ConnectAsync(options).ConfigureAwait(false);
-			await this.OnStarted().ConfigureAwait(false);
+			await this.OnStartedAsync().ConfigureAwait(false);
 		}
 
-		public async Task Disconnect()
+		public async Task DisconnectAsync()
 		{
 			_shouldReconnect = false;
 
 			// provide a hook so death messages can be sent
-			await this.OnBeforeDisconnect().ConfigureAwait(false);
+			await this.OnBeforeDisconnectAsync().ConfigureAwait(false);
 
 			// per [tck-id-host-topic-phid-death-payload-disconnect-clean] and [tck-id-host-topic-phid-death-payload-disconnect-with-no-disconnect-packet]
 			var options = new MqttFactory().CreateClientDisconnectOptionsBuilder().WithReason(MqttClientDisconnectReason.ServerShuttingDown).Build();
@@ -106,7 +106,7 @@ namespace Base10.SparkplugB.Core.Services
 		#region MQTT lifecycle Events
 
 		private readonly AsyncEvent<EventArgs> _beforeStartEvent = new AsyncEvent<EventArgs>();
-		public event Func<EventArgs, Task> BeforeStart
+		public event Func<EventArgs, Task> BeforeStartAsync
 		{
 			add
 			{
@@ -117,13 +117,13 @@ namespace Base10.SparkplugB.Core.Services
 				_beforeStartEvent.RemoveHandler(value);
 			}
 		}
-		private async Task OnBeforeStart()
+		private async Task OnBeforeStartAsync()
 		{
 			await _beforeStartEvent.InvokeAsync(new EventArgs()).ConfigureAwait(false);
 		}
 
 		private readonly AsyncEvent<EventArgs> _startedEvent = new AsyncEvent<EventArgs>();
-		public event Func<EventArgs, Task> Started
+		public event Func<EventArgs, Task> StartedAsync
 		{
 			add
 			{
@@ -134,13 +134,13 @@ namespace Base10.SparkplugB.Core.Services
 				_startedEvent.RemoveHandler(value);
 			}
 		}
-		private async Task OnStarted()
+		private async Task OnStartedAsync()
 		{
 			await _startedEvent.InvokeAsync(new EventArgs()).ConfigureAwait(false);
 		}
 
 		private readonly AsyncEvent<EventArgs> _connectedEvent = new();
-		public event Func<EventArgs, Task> Connected
+		public event Func<EventArgs, Task> ConnectedAsync
 		{
 			add
 			{
@@ -151,13 +151,13 @@ namespace Base10.SparkplugB.Core.Services
 				_connectedEvent.RemoveHandler(value);
 			}
 		}
-		private async Task OnConnected(MqttClientConnectedEventArgs arg)
+		private async Task OnConnectedAsync(MqttClientConnectedEventArgs arg)
 		{
 			await _connectedEvent.InvokeAsync(arg).ConfigureAwait(false);
 		}
 
 		private readonly AsyncEvent<EventArgs> _beforeDisconnectEvent = new();
-		public event Func<EventArgs, Task> BeforeDisconnect
+		public event Func<EventArgs, Task> BeforeDisconnectAsync
 		{
 			add
 			{
@@ -168,13 +168,13 @@ namespace Base10.SparkplugB.Core.Services
 				_beforeDisconnectEvent.RemoveHandler(value);
 			}
 		}
-		private async Task OnBeforeDisconnect()
+		private async Task OnBeforeDisconnectAsync()
 		{
 			await _beforeDisconnectEvent.InvokeAsync(new EventArgs()).ConfigureAwait(false);
 		}
 
 		private readonly AsyncEvent<EventArgs> _disconnectedEvent = new();
-		public event Func<EventArgs, Task> Disconnected
+		public event Func<EventArgs, Task> DisconnectedAsync
 		{
 			add
 			{
@@ -185,12 +185,12 @@ namespace Base10.SparkplugB.Core.Services
 				_disconnectedEvent.RemoveHandler(value);
 			}
 		}
-		private async Task OnDisconnected(MqttClientDisconnectedEventArgs arg)
+		private async Task OnDisconnectedAsync(MqttClientDisconnectedEventArgs arg)
 		{
 			await _disconnectedEvent.InvokeAsync(arg).ConfigureAwait(false);
 			if (_shouldReconnect)
 			{
-				await this.Connect().ConfigureAwait(false);
+				await this.ConnectAsync().ConfigureAwait(false);
 			}
 		}
 
