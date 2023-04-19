@@ -19,7 +19,7 @@ namespace Base10.SparkplugB.Tests.Core.Services
 		[MemberData(nameof(GenerateMetrics), 0)]
 		[MemberData(nameof(GenerateMetrics), 1)]
 		[MemberData(nameof(GenerateMetrics), 2)]
-		public async Task MessagesSetSeqBdSeqAndUseCorrectTopic(IList<Metric> metrics)
+		public async Task MessagesSetSeqAndTimestampAndUseCorrectTopic(IList<Metric> metrics)
 		{
 			var mqttClient = new Mock<IMqttClient>();
 			MQTTnet.MqttApplicationMessage? message = null;
@@ -39,21 +39,23 @@ namespace Base10.SparkplugB.Tests.Core.Services
 
 			message.Should().NotBeNull();
 			var p = Payload.Parser.ParseFrom(message?.Payload);
-			p.Metrics.Count.Should().Be(metrics.Count + 1);
-			p.Metrics.Any(m => m.Name == "bdSeq").Should().BeTrue();
-			p.Metrics.Where(m => m.Name == "bdSeq").First().IntValue.Should().Be(app.CurrentBirthSequence());
+			p.Timestamp.Should().BeGreaterThan(0).And.BeCloseTo((ulong)DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(), 2000);
+			p.Metrics.Count.Should().Be(metrics.Count);
 			message?.Topic.Should().Be("spBv1.0/testgroup/DCMD/node/device");
 
 			// send it again to make sure sequence increments
 			var lastSequence = payload.Seq;
+			var lastTimestamp = p.Timestamp;
+			Thread.Sleep(5); // make sure some time elapses so timestamp is different
 			await app.SendDeviceCommand("node", "device", payload);
 			payload.Seq.Should().Be(lastSequence + 1);
-			p.Metrics.Count.Should().Be(metrics.Count + 1); // make sure duplicate bdSeq is not added
+			payload.Timestamp.Should().BeGreaterThan(lastTimestamp);
+			p.Metrics.Count.Should().Be(metrics.Count);
 
 			// send it again as a node metric
 			await app.SendNodeCommand("node", payload);
 			payload.Seq.Should().Be(lastSequence + 2);
-			p.Metrics.Count.Should().Be(metrics.Count + 1);
+			p.Metrics.Count.Should().Be(metrics.Count);
 			message?.Topic.Should().Be("spBv1.0/testgroup/NCMD/node");
 		}
 

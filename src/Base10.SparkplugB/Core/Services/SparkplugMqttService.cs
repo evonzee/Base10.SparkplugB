@@ -76,11 +76,7 @@ namespace Base10.SparkplugB.Core.Services
 		protected virtual Payload PreparePayloadForTransmission(Payload payload)
 		{
 			payload.Seq = this.NextCommandSequence();
-			payload.Metrics.Add(new Payload.Types.Metric()
-			{
-				Name = "bdSeq",
-				IntValue = CurrentBirthSequence()
-			});
+			payload.Timestamp = (ulong)DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 			return payload;
 		}
 
