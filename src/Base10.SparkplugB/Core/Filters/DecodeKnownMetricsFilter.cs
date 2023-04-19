@@ -22,7 +22,7 @@ namespace Base10.SparkplugB.Core.Filters
 		{
 			return topic.Command switch
 			{
-				CommandType.NCMD or CommandType.NDATA or CommandType.DCMD or CommandType.DDATA => await DecodeAsync(topic, payload).ConfigureAwait(false),
+				SparkplugMessageType.NCMD or SparkplugMessageType.NDATA or SparkplugMessageType.DCMD or SparkplugMessageType.DDATA => await DecodeAsync(topic, payload).ConfigureAwait(false),
 				_ => payload,
 			};
 		}

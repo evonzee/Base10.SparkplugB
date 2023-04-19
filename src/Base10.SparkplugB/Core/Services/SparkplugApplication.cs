@@ -52,7 +52,7 @@ namespace Base10.SparkplugB.Core.Services
 			return builder
 				.WithWillContentType("application/json")
 				.WithWillDelayInterval(0)
-				.WithWillTopic(new SparkplugTopic(CommandType.STATE, _nodeName).ToMqttTopic()) // [tck-id-host-topic-phid-death-topic]
+				.WithWillTopic(new SparkplugTopic(SparkplugMessageType.STATE, _nodeName).ToMqttTopic()) // [tck-id-host-topic-phid-death-topic]
 				.WithWillPayload(JsonSerializer.Serialize(willPayload)) //[tck-id-host-topic-phid-death-payload]
 				.WithWillRetain(true) // [tck-id-host-topic-phid-death-retain]
 				.WithWillQualityOfServiceLevel(MQTTnet.Protocol.MqttQualityOfServiceLevel.AtLeastOnce) // [tck-id-host-topic-phid-death-qos]
@@ -62,19 +62,19 @@ namespace Base10.SparkplugB.Core.Services
 		private async Task SubscribeInitialAsync(IMqttClient mqttClient)
 		{
 			var optionsBuilder = new MqttClientSubscribeOptionsBuilder()
-				.WithTopicFilter(CommandType.STATE.GetSubscriptionPattern(), MQTTnet.Protocol.MqttQualityOfServiceLevel.AtMostOnce);
+				.WithTopicFilter(SparkplugMessageType.STATE.GetSubscriptionPattern(), MQTTnet.Protocol.MqttQualityOfServiceLevel.AtMostOnce);
 			if (_options.Promiscuous)
 			{
 				optionsBuilder = optionsBuilder.WithTopicFilter("spBv1.0/#");
 			}
 			else
 			{
-				optionsBuilder = optionsBuilder.WithTopicFilter(CommandType.NBIRTH.GetSubscriptionPattern(_group), MQTTnet.Protocol.MqttQualityOfServiceLevel.AtMostOnce)
-					.WithTopicFilter(CommandType.NDEATH.GetSubscriptionPattern(_group), MQTTnet.Protocol.MqttQualityOfServiceLevel.AtMostOnce)
-					.WithTopicFilter(CommandType.NDATA.GetSubscriptionPattern(_group), MQTTnet.Protocol.MqttQualityOfServiceLevel.AtMostOnce)
-					.WithTopicFilter(CommandType.DBIRTH.GetSubscriptionPattern(_group), MQTTnet.Protocol.MqttQualityOfServiceLevel.AtMostOnce)
-					.WithTopicFilter(CommandType.DDEATH.GetSubscriptionPattern(_group), MQTTnet.Protocol.MqttQualityOfServiceLevel.AtMostOnce)
-					.WithTopicFilter(CommandType.DDATA.GetSubscriptionPattern(_group), MQTTnet.Protocol.MqttQualityOfServiceLevel.AtMostOnce);
+				optionsBuilder = optionsBuilder.WithTopicFilter(SparkplugMessageType.NBIRTH.GetSubscriptionPattern(_group), MQTTnet.Protocol.MqttQualityOfServiceLevel.AtMostOnce)
+					.WithTopicFilter(SparkplugMessageType.NDEATH.GetSubscriptionPattern(_group), MQTTnet.Protocol.MqttQualityOfServiceLevel.AtMostOnce)
+					.WithTopicFilter(SparkplugMessageType.NDATA.GetSubscriptionPattern(_group), MQTTnet.Protocol.MqttQualityOfServiceLevel.AtMostOnce)
+					.WithTopicFilter(SparkplugMessageType.DBIRTH.GetSubscriptionPattern(_group), MQTTnet.Protocol.MqttQualityOfServiceLevel.AtMostOnce)
+					.WithTopicFilter(SparkplugMessageType.DDEATH.GetSubscriptionPattern(_group), MQTTnet.Protocol.MqttQualityOfServiceLevel.AtMostOnce)
+					.WithTopicFilter(SparkplugMessageType.DDATA.GetSubscriptionPattern(_group), MQTTnet.Protocol.MqttQualityOfServiceLevel.AtMostOnce);
 			}
 
 			var options = optionsBuilder.Build();
@@ -95,7 +95,7 @@ namespace Base10.SparkplugB.Core.Services
 		{
 			var payload = new { online = state, timestamp = _connectTimestamp };
 			await mqttClient.PublishAsync(new MQTTnet.MqttApplicationMessageBuilder()
-				.WithTopic(new SparkplugTopic(CommandType.STATE, _nodeName).ToMqttTopic())
+				.WithTopic(new SparkplugTopic(SparkplugMessageType.STATE, _nodeName).ToMqttTopic())
 				.WithPayload(JsonSerializer.Serialize(payload))
 				.WithQualityOfServiceLevel(MQTTnet.Protocol.MqttQualityOfServiceLevel.AtLeastOnce)
 				.WithRetainFlag(true)
@@ -106,7 +106,7 @@ namespace Base10.SparkplugB.Core.Services
 		{
 			payload = PreparePayloadForTransmission(payload);
 			await _mqttClient.PublishAsync(new MQTTnet.MqttApplicationMessageBuilder()
-				.WithTopic(new SparkplugTopic(CommandType.NCMD, node, _group).ToMqttTopic())
+				.WithTopic(new SparkplugTopic(SparkplugMessageType.NCMD, node, _group).ToMqttTopic())
 				.WithPayload(payload.ToByteArray())
 				.WithQualityOfServiceLevel(MQTTnet.Protocol.MqttQualityOfServiceLevel.AtMostOnce)
 				.Build());
@@ -116,7 +116,7 @@ namespace Base10.SparkplugB.Core.Services
 		{
 			payload = PreparePayloadForTransmission(payload);
 			await _mqttClient.PublishAsync(new MQTTnet.MqttApplicationMessageBuilder()
-				.WithTopic(new SparkplugTopic(CommandType.DCMD, node, _group, device).ToMqttTopic())
+				.WithTopic(new SparkplugTopic(SparkplugMessageType.DCMD, node, _group, device).ToMqttTopic())
 				.WithPayload(payload.ToByteArray())
 				.WithQualityOfServiceLevel(MQTTnet.Protocol.MqttQualityOfServiceLevel.AtMostOnce)
 				.Build());

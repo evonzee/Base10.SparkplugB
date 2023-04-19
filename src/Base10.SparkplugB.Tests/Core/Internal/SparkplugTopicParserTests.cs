@@ -13,10 +13,10 @@ namespace Base10.SparkplugB.Tests.Core.Internal
 	public class SparkplugTopicParserTests
 	{
 		[Theory]
-		[InlineData("spBv1.0/group/DCMD/edge_node/device_id", "group", CommandType.DCMD, "edge_node", "device_id")]
-		[InlineData("spBv1.0/group/NCMD/edge_node", "group", CommandType.NCMD, "edge_node", null)]
-		[InlineData("spBv1.0/STATE/edge_node", null, CommandType.STATE, "edge_node", null)]
-		public void BasicValidTopicsParse(string topic, string group, CommandType command, string node, string deviceId)
+		[InlineData("spBv1.0/group/DCMD/edge_node/device_id", "group", SparkplugMessageType.DCMD, "edge_node", "device_id")]
+		[InlineData("spBv1.0/group/NCMD/edge_node", "group", SparkplugMessageType.NCMD, "edge_node", null)]
+		[InlineData("spBv1.0/STATE/edge_node", null, SparkplugMessageType.STATE, "edge_node", null)]
+		public void BasicValidTopicsParse(string topic, string group, SparkplugMessageType command, string node, string deviceId)
 		{
 			var parser = new SparkplugTopicParser();
 			var parsed = parser.Parse(topic);

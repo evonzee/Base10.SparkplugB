@@ -29,19 +29,19 @@ namespace Base10.SparkplugB.Core.Internal
 			if (topicParts[1].Equals("STATE"))
 				return ParseState(topicParts);
 
-			var commandType = Enum.Parse<CommandType>(topicParts[2], true);
+			var commandType = Enum.Parse<SparkplugMessageType>(topicParts[2], true);
 
 			switch (commandType)
 			{
-				case CommandType.NBIRTH:
-				case CommandType.NDATA:
-				case CommandType.NDEATH:
-				case CommandType.NCMD:
+				case SparkplugMessageType.NBIRTH:
+				case SparkplugMessageType.NDATA:
+				case SparkplugMessageType.NDEATH:
+				case SparkplugMessageType.NCMD:
 					return ParseNodeCommand(topicParts, commandType);
-				case CommandType.DBIRTH:
-				case CommandType.DDATA:
-				case CommandType.DDEATH:
-				case CommandType.DCMD:
+				case SparkplugMessageType.DBIRTH:
+				case SparkplugMessageType.DDATA:
+				case SparkplugMessageType.DDEATH:
+				case SparkplugMessageType.DCMD:
 					return ParseDeviceCommand(topicParts, commandType);
 				default:
 					throw new ArgumentException($"Topic '{topic}' is not a valid Sparkplug topic: STATE commands must not include group.", nameof(topic));
@@ -51,15 +51,15 @@ namespace Base10.SparkplugB.Core.Internal
 
 		private SparkplugTopic ParseState(string[] topicParts)
 		{
-			return new SparkplugTopic(Command: CommandType.STATE, Node: topicParts[2]);
+			return new SparkplugTopic(Command: SparkplugMessageType.STATE, Node: topicParts[2]);
 		}
 
-		private SparkplugTopic ParseNodeCommand(string[] topicParts, CommandType commandType)
+		private SparkplugTopic ParseNodeCommand(string[] topicParts, SparkplugMessageType commandType)
 		{
 			return new SparkplugTopic(Command: commandType, Node: topicParts[3], Group: topicParts[1]);
 		}
 
-		private SparkplugTopic ParseDeviceCommand(string[] topicParts, CommandType commandType)
+		private SparkplugTopic ParseDeviceCommand(string[] topicParts, SparkplugMessageType commandType)
 		{
 			return new SparkplugTopic(Command: commandType, Node: topicParts[3], Group: topicParts[1], DeviceId: topicParts[4]);
 		}

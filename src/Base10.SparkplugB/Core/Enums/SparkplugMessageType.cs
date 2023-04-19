@@ -1,6 +1,6 @@
 namespace Base10.SparkplugB.Core.Enums
 {
-	public enum CommandType
+	public enum SparkplugMessageType
 	{
 		NBIRTH,
 		NDATA,

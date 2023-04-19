@@ -34,7 +34,7 @@ namespace Base10.SparkplugB.Core.Services
 			var topic = _topicParser.Parse(arg.ApplicationMessage.Topic);
 			switch (topic.Command)
 			{
-				case Enums.CommandType.STATE:
+				case Enums.SparkplugMessageType.STATE:
 					var state = _messageParser.ParseState(arg.ApplicationMessage.Payload);
 					await FireEventAsync(arg, state, async (s) =>
 					{
@@ -42,7 +42,7 @@ namespace Base10.SparkplugB.Core.Services
 						await OnStateMessageReceivedAsync(args).ConfigureAwait(false);
 					}).ConfigureAwait(false);
 					break;
-				case Enums.CommandType.NBIRTH:
+				case Enums.SparkplugMessageType.NBIRTH:
 					var payload = _messageParser.ParseSparkplug(arg.ApplicationMessage.Payload);
 					await FireEventAsync(arg, payload, async (p) =>
 					{
@@ -50,7 +50,7 @@ namespace Base10.SparkplugB.Core.Services
 						await OnNodeBirthReceivedAsync(args).ConfigureAwait(false);
 					}).ConfigureAwait(false);
 					break;
-				case Enums.CommandType.NDATA:
+				case Enums.SparkplugMessageType.NDATA:
 					payload = _messageParser.ParseSparkplug(arg.ApplicationMessage.Payload);
 					await FireEventAsync(arg, payload, async (p) =>
 					{
@@ -58,7 +58,7 @@ namespace Base10.SparkplugB.Core.Services
 						await OnNodeDataReceivedAsync(args).ConfigureAwait(false);
 					}).ConfigureAwait(false);
 					break;
-				case Enums.CommandType.NDEATH:
+				case Enums.SparkplugMessageType.NDEATH:
 					payload = _messageParser.ParseSparkplug(arg.ApplicationMessage.Payload);
 					await FireEventAsync(arg, payload, async (p) =>
 					{
@@ -66,7 +66,7 @@ namespace Base10.SparkplugB.Core.Services
 						await OnNodeDeathReceivedAsync(args).ConfigureAwait(false);
 					}).ConfigureAwait(false);
 					break;
-				case Enums.CommandType.NCMD:
+				case Enums.SparkplugMessageType.NCMD:
 					payload = _messageParser.ParseSparkplug(arg.ApplicationMessage.Payload);
 					await FireEventAsync(arg, payload, async (p) =>
 					{
@@ -74,7 +74,7 @@ namespace Base10.SparkplugB.Core.Services
 						await OnNodeCommandReceivedAsync(args).ConfigureAwait(false);
 					}).ConfigureAwait(false);
 					break;
-				case Enums.CommandType.DBIRTH:
+				case Enums.SparkplugMessageType.DBIRTH:
 					payload = _messageParser.ParseSparkplug(arg.ApplicationMessage.Payload);
 					await FireEventAsync(arg, payload, async (p) =>
 					{
@@ -82,7 +82,7 @@ namespace Base10.SparkplugB.Core.Services
 						await OnDeviceBirthReceivedAsync(args).ConfigureAwait(false);
 					}).ConfigureAwait(false);
 					break;
-				case Enums.CommandType.DDATA:
+				case Enums.SparkplugMessageType.DDATA:
 					payload = _messageParser.ParseSparkplug(arg.ApplicationMessage.Payload);
 					await FireEventAsync(arg, payload, async (p) =>
 					{
@@ -90,7 +90,7 @@ namespace Base10.SparkplugB.Core.Services
 						await OnDeviceDataReceivedAsync(args).ConfigureAwait(false);
 					}).ConfigureAwait(false);
 					break;
-				case Enums.CommandType.DDEATH:
+				case Enums.SparkplugMessageType.DDEATH:
 					payload = _messageParser.ParseSparkplug(arg.ApplicationMessage.Payload);
 					await FireEventAsync(arg, payload, async (p) =>
 					{
@@ -98,7 +98,7 @@ namespace Base10.SparkplugB.Core.Services
 						await OnDeviceDeathReceivedAsync(args).ConfigureAwait(false);
 					}).ConfigureAwait(false);
 					break;
-				case Enums.CommandType.DCMD:
+				case Enums.SparkplugMessageType.DCMD:
 					payload = _messageParser.ParseSparkplug(arg.ApplicationMessage.Payload);
 					await FireEventAsync(arg, payload, async (p) =>
 					{
